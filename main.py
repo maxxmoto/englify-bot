@@ -357,9 +357,11 @@ async def add_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Использование: /addpro user_id")
 
 # ---------- ЗАПУСК ----------
+import platform
+
 if __name__ == "__main__":
-    # Windows: переключаемся на SelectorEventLoop, чтобы избежать ошибок закрытия ProactorEventLoop
-    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    if platform.system() == "Windows":
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
     init_db()
     app = Application.builder().token(TOKEN).build()
@@ -368,9 +370,8 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("addpro", add_pro))
     app.add_handler(CallbackQueryHandler(button_handler))
 
-    # Запускаем планировщик в текущем event loop
     loop = asyncio.get_event_loop()
     loop.create_task(scheduler(app))
 
     print("Бот запущен...")
-    app.run_polling(close_loop=False)  # не закрываем цикл, чтобы планировщик продолжался
+    app.run_polling(close_loop=False)
