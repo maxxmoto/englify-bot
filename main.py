@@ -175,9 +175,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         lang
     )
     keyboard = [
-        [InlineKeyboardButton(_("📝 Тест на уровень", "📝 Level test"), callback_data="start_test")],
-        [InlineKeyboardButton(_("⚡ Выбрать уровень самому", "⚡ Choose level"), callback_data="choose_level")],
-        [InlineKeyboardButton(_("🌐 Переключить язык", "🌐 Switch language"), callback_data="toggle_lang")]
+        [InlineKeyboardButton(_("📝 Тест на уровень", "📝 Level test", lang), callback_data="start_test")],
+        [InlineKeyboardButton(_("⚡ Выбрать уровень самому", "⚡ Choose level", lang), callback_data="choose_level")],
+        [InlineKeyboardButton(_("🌐 Переключить язык", "🌐 Switch language", lang), callback_data="toggle_lang")]
     ]
     await update.message.reply_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
 
