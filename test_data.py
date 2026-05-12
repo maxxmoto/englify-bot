@@ -1,0 +1,17 @@
+TEST_QUESTIONS = [
+    {"question": "What does 'apple' mean?", "options": ["Яблоко", "Апельсин", "Банан", "Груша"], "correct": 0},
+    {"question": "The opposite of 'big' is...", "options": ["Small", "Large", "Tall", "Huge"], "correct": 0},
+    {"question": "She ___ to school every day.", "options": ["go", "goes", "gone", "going"], "correct": 1},
+    {"question": "Choose the correct translation: 'run'", "options": ["Бежать", "Прыгать", "Летать", "Плавать"], "correct": 0},
+    {"question": "What is the plural of 'child'?", "options": ["Children", "Childs", "Childes", "Childrens"], "correct": 0},
+    {"question": "I ___ a student.", "options": ["am", "is", "are", "be"], "correct": 0},
+    {"question": "Choose the correct sentence:", "options": ["He don't like coffee.", "He doesn't likes coffee.", "He doesn't like coffee.", "He not like coffee."], "correct": 2},
+    {"question": "The past tense of 'eat' is:", "options": ["Ate", "Eated", "Eaten", "Eating"], "correct": 0},
+    {"question": "How do you say 'спасибо' in English?", "options": ["Please", "Sorry", "Thank you", "Hello"], "correct": 2},
+    {"question": "If I ___ rich, I would travel the world.", "options": ["am", "was", "were", "be"], "correct": 2},
+    {"question": "Choose the synonym of 'happy':", "options": ["Sad", "Glad", "Angry", "Upset"], "correct": 1},
+    {"question": "What does 'get over' mean?", "options": ["Переходить", "Преодолеть, оправиться", "Достать", "Понять"], "correct": 1},
+    {"question": "He ___ finished his homework by 8 pm.", "options": ["has", "have", "had", "having"], "correct": 2},
+    {"question": "Choose the article: ___ university", "options": ["a", "an", "the", "no article"], "correct": 0},
+    {"question": "If they ___ earlier, they would have caught the train.", "options": ["leave", "left", "had left", "would leave"], "correct": 2},
+]
