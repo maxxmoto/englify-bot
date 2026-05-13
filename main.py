@@ -1,6 +1,7 @@
 import sqlite3
 import asyncio
 import os
+import platform
 from datetime import datetime, date
 import pytz
 from dotenv import load_dotenv
@@ -9,7 +10,6 @@ from telegram.ext import Application, CommandHandler, CallbackQueryHandler, Cont
 from content import get_daily_word, generate_tasks
 from test_data import TEST_QUESTIONS
 
-# Загружаем секреты из .env файла
 load_dotenv()
 TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_IDS = [int(id.strip()) for id in os.getenv("ADMIN_IDS", "").split(",") if id.strip()]
@@ -143,8 +143,8 @@ async def daily_job(app):
             lang
         )
         keyboard = [
-            [InlineKeyboardButton(_("✅ Выучил", "✅ Learned"), callback_data=f"learned_{word_data['word']}")],
-            [InlineKeyboardButton(_("📋 Мои слова", "📋 My words"), callback_data="menu_words")]
+            [InlineKeyboardButton(_("✅ Выучил", "✅ Learned", lang), callback_data=f"learned_{word_data['word']}")],
+            [InlineKeyboardButton(_("📋 Мои слова", "📋 My words", lang), callback_data="menu_words")]
         ]
         try:
             await app.bot.send_message(uid, f"{greeting}\n\n{word_line}",
@@ -155,6 +155,12 @@ async def daily_job(app):
 # ---------- ПЛАНИРОВЩИК ----------
 async def scheduler(app):
     sent_today = False
+    # При старте проверяем, не нужно ли немедленно отправить слово дня
+    now = datetime.now(MOSCOW_TZ)
+    if now.hour >= 9 and not sent_today:
+        # Если уже сегодня 9:00 или позже, отправляем слово
+        await daily_job(app)
+        sent_today = True
     while True:
         now = datetime.now(MOSCOW_TZ)
         if now.hour == 9 and now.minute == 0 and not sent_today:
@@ -219,9 +225,9 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
     elif data == "choose_level":
         keyboard = [
-            [InlineKeyboardButton(_("🟢 Новичок", "🟢 Novice"), callback_data="set_novice"),
-             InlineKeyboardButton(_("🟡 Мидл", "🟡 Middle"), callback_data="set_middle"),
-             InlineKeyboardButton(_("🔴 Профи", "🔴 Pro"), callback_data="set_pro")]
+            [InlineKeyboardButton(_("🟢 Новичок", "🟢 Novice", lang), callback_data="set_novice"),
+             InlineKeyboardButton(_("🟡 Мидл", "🟡 Middle", lang), callback_data="set_middle"),
+             InlineKeyboardButton(_("🔴 Профи", "🔴 Pro", lang), callback_data="set_pro")]
         ]
         await query.edit_message_text(_("Выбери уровень:", "Choose your level:", lang),
                                       reply_markup=InlineKeyboardMarkup(keyboard))
@@ -292,9 +298,9 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(text, reply_markup=main_menu_keyboard(lang))
     elif data == "menu_level":
         keyboard = [
-            [InlineKeyboardButton(_("🟢 Новичок", "🟢 Novice"), callback_data="set_novice"),
-             InlineKeyboardButton(_("🟡 Мидл", "🟡 Middle"), callback_data="set_middle"),
-             InlineKeyboardButton(_("🔴 Профи", "🔴 Pro"), callback_data="set_pro")]
+            [InlineKeyboardButton(_("🟢 Новичок", "🟢 Novice", lang), callback_data="set_novice"),
+             InlineKeyboardButton(_("🟡 Мидл", "🟡 Middle", lang), callback_data="set_middle"),
+             InlineKeyboardButton(_("🔴 Профи", "🔴 Pro", lang), callback_data="set_pro")]
         ]
         await query.edit_message_text(_("Выбери уровень:", "Choose your level:", lang),
                                       reply_markup=InlineKeyboardMarkup(keyboard))
@@ -357,8 +363,6 @@ async def add_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Использование: /addpro user_id")
 
 # ---------- ЗАПУСК ----------
-import platform
-
 if __name__ == "__main__":
     if platform.system() == "Windows":
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
