@@ -895,7 +895,6 @@ let builderScore = 0;
 let builderSlots = [];
 let builderPoolLetters = [];
 let builderDragging = null;
-let builderOffsetX = 0, builderOffsetY = 0;
 
 function renderWordBuilderPage(main) {
     builderLives = 3;
@@ -935,7 +934,6 @@ function pickBuilderWord() {
 }
 
 function initBuilder() {
-    // Создаём слоты под каждую букву
     const slotsContainer = document.getElementById('slotsContainer');
     slotsContainer.innerHTML = '';
     builderSlots = [];
@@ -949,10 +947,7 @@ function initBuilder() {
         builderSlots.push({ element: slot, letter: null });
     }
 
-    // Берём буквы загаданного слова
     const letters = builderCurrentWord.en.split('');
-    
-    // Добавляем 2-3 лишние буквы (другие, не из слова)
     const alphabet = 'abcdefghijklmnopqrstuvwxyz';
     const extraCount = Math.min(3, Math.floor(letters.length / 2));
     for (let i = 0; i < extraCount; i++) {
@@ -962,23 +957,6 @@ function initBuilder() {
         } while (letters.includes(extraLetter));
         letters.push(extraLetter);
     }
-
-    // Перемешиваем
-    for (let i = letters.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [letters[i], letters[j]] = [letters[j], letters[i]];
-    }
-    builderPoolLetters = letters;
-    renderPool();
-}
-    // Создаём пул перемешанных букв
-    const letters = builderCurrentWord.en.split('');
-    // Добавим пару лишних случайных букв для сложности
-    const extraLetters = 'abcdefghijklmnopqrstuvwxyz'.split('');
-    for (let i = 0; i < 3; i++) {
-        letters.push(extraLetters[Math.floor(Math.random() * extraLetters.length)]);
-    }
-    // Перемешиваем
     for (let i = letters.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [letters[i], letters[j]] = [letters[j], letters[i]];
@@ -1022,13 +1000,11 @@ function onDrop(e) {
     if (slotIndex === undefined) return;
     const slot = builderSlots[slotIndex];
     if (slot.letter !== null) {
-        // Возвращаем букву обратно в пул
         builderPoolLetters.push(slot.letter);
         slot.letter = null;
         renderPool();
         return;
     }
-    // Удаляем букву из пула
     const poolIndex = builderPoolLetters.indexOf(letter);
     if (poolIndex > -1) {
         builderPoolLetters.splice(poolIndex, 1);
@@ -1084,9 +1060,8 @@ function updateBuilderLives() {
     }
 }
 
-
-        // ===== ЗАПУСК =====
-        renderPage();
+// ===== ЗАПУСК =====
+renderPage();
     </script>
 </body>
 </html>
