@@ -502,8 +502,8 @@ def generate_tasks(day_index: int, level: str):
     tasks = []
     if level == "novice":
     # Собираем пулы
-    eng_words_pool = [wd["word"] for wd in WORDS_OF_DAY if wd["word"] != w]
-    pool_trans = [wd["translation"] for wd in WORDS_OF_DAY if wd["translation"] != trans]
+      eng_words_pool = [wd["word"] for wd in WORDS_OF_DAY if wd["word"] != w]
+      pool_trans = [wd["translation"] for wd in WORDS_OF_DAY if wd["translation"] != trans]
 
     # Фейковые русские переводы (для заданий 1 и 3)
     if len(pool_trans) >= 2:
@@ -512,30 +512,42 @@ def generate_tasks(day_index: int, level: str):
         fake1, fake2 = "перевод1", "перевод2"
 
     # Фейковые английские слова (для задания 2)
-    if len(eng_words_pool) >= 2:
-        random_eng1, random_eng2 = random.sample(eng_words_pool, 2)
-    else:
-        random_eng1, random_eng2 = "word1", "word2"
+        if level == "novice":
+        # Собираем пулы
+        eng_words_pool = [wd["word"] for wd in WORDS_OF_DAY if wd["word"] != w]
+        pool_trans = [wd["translation"] for wd in WORDS_OF_DAY if wd["translation"] != trans]
 
-    for t in NOVICE_TEMPLATES:
-        q = t["question"].format(
-            word=w, translation=trans,
-            example=ex, example_translation=ex_trans,
-            fake1=fake1, fake2=fake2,
-            random_eng1=random_eng1, random_eng2=random_eng2
-        )
-        opts = [opt.format(
-            word=w, translation=trans,
-            example=ex, example_translation=ex_trans,
-            fake1=fake1, fake2=fake2,
-            random_eng1=random_eng1, random_eng2=random_eng2
-        ) for opt in t["options"]]
-        tasks.append({
-            "question": q,
-            "options": opts,
-            "correct": t["correct"],
-            "word": w
-        })
+        # Фейковые русские переводы (для заданий 1 и 3)
+        if len(pool_trans) >= 2:
+            fake1, fake2 = random.sample(pool_trans, 2)
+        else:
+            fake1, fake2 = "перевод1", "перевод2"
+
+        # Фейковые английские слова (для задания 2)
+        if len(eng_words_pool) >= 2:
+            random_eng1, random_eng2 = random.sample(eng_words_pool, 2)
+        else:
+            random_eng1, random_eng2 = "word1", "word2"
+
+        for t in NOVICE_TEMPLATES:
+            q = t["question"].format(
+                word=w, translation=trans,
+                example=ex, example_translation=ex_trans,
+                fake1=fake1, fake2=fake2,
+                random_eng1=random_eng1, random_eng2=random_eng2
+            )
+            opts = [opt.format(
+                word=w, translation=trans,
+                example=ex, example_translation=ex_trans,
+                fake1=fake1, fake2=fake2,
+                random_eng1=random_eng1, random_eng2=random_eng2
+            ) for opt in t["options"]]
+            tasks.append({
+                "question": q,
+                "options": opts,
+                "correct": t["correct"],
+                "word": w
+            })
     elif level == "middle":
         syn = SYNONYMS.get(w, "relevant word")
         ant = ANTONYMS.get(w, "opposite")

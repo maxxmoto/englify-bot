@@ -228,12 +228,6 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 reply_markup=main_menu_keyboard(lang)
             )
 
-    elif data.startswith("voice_"):
-    	word = data[6:]  # убираем "voice_"
-    	await send_voice_word(uid, word, lang, context)
-    	await query.answer("🔊 Отправляю голосовое...")
-
-
     elif data == "choose_level":
         keyboard = [
             [InlineKeyboardButton(_("🟢 Новичок", "🟢 Novice", lang), callback_data="set_novice"),
@@ -346,7 +340,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             hint = "Нет задания"
         await query.answer(hint, show_alert=True)
 
-    # ---------- ТРЕНАЖЁР ГЛАГОЛОВ ----------
+        # ---------- ТРЕНАЖЁР ГЛАГОЛОВ ----------
     elif data == "menu_verbs":
         context.user_data["verb_score"] = 0
         context.user_data["verb_index"] = 0
@@ -354,7 +348,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data["verbs"] = verbs
         await ask_verb_question(query, context, lang)
     elif data.startswith("verb_"):
-        parts = data.split("_", 1)  # verb_answer_0 или verb_answer_1 и т.д.
+        parts = data.split("_", 1)
         if len(parts) < 2:
             return
         answer_idx = int(parts[1])
@@ -363,7 +357,6 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not verbs or idx >= len(verbs):
             return
         current_verb = verbs[idx]
-        # В текущем вопросе правильный ответ хранится в user_data
         correct_idx = context.user_data.get("verb_correct_idx", 0)
         correct = (answer_idx == correct_idx)
         if correct:
@@ -380,6 +373,11 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 f"{total_score}/{len(verbs)}",
                 reply_markup=main_menu_keyboard(lang)
             )
+
+    elif data.startswith("voice_"):
+        word = data[6:]
+        await send_voice_word(uid, word, lang, context)
+        await query.answer("🔊 Голосовое сообщение отправлено!")
 
 async def ask_verb_question(query, context, lang, prefix=""):
     verbs = context.user_data.get("verbs")
