@@ -90,7 +90,7 @@
 
     <!-- Шапка -->
     <header>
-        <img id="logoImg" src="logo.PNG" alt="Englify" class="logo-img">
+        <img id="logoImg" src="logo.png" alt="Englify" class="logo-img">
         <button class="theme-btn" onclick="toggleTheme()"><img id="themeIcon" src="daymod.png" class="theme-icon"></button>
         <button class="burger-btn" id="burgerBtn" onclick="toggleMenu()"><span></span><span></span><span></span></button>
         <div class="mobile-nav" id="mobileNav">
@@ -367,7 +367,7 @@
                 document.body.classList.remove('theme-night');
                 document.body.classList.add('theme-day');
                 document.getElementById('themeIcon').src = 'daymod.png';
-                document.getElementById('logoImg').src = 'logo.PNG';
+                document.getElementById('logoImg').src = 'logo.png';
                 localStorage.setItem('engTheme', 'day');
             } else {
                 document.body.classList.remove('theme-day');
