@@ -112,6 +112,7 @@
             <a href="#" onclick="showPage('grammar')">📘 Грамматика</a>
             <a href="#" onclick="showPage('words')">📚 Словарь</a>
             <a href="#" onclick="showPage('pro')">⭐ Pro</a>
+            <a href="#" onclick="showPage('game')">🎮 Игра</a>
         </div>
     </header>
 
@@ -183,6 +184,7 @@
                 case 'grammar': renderGrammarLevels(main); break;
                 case 'words': renderWordsPage(main); break;
                 case 'pro': renderProPage(main); break;
+	        case 'game': renderGamePage(main); break;
                 default: renderWordPage(main);
             }
         }
@@ -464,6 +466,267 @@
             document.getElementById('mobileNav').classList.toggle('active');
             document.getElementById('burgerBtn').classList.toggle('active');
         }
+
+
+
+
+// ===== ИГРА "МИККИ-РАННЕР" =====
+let gameRunning = false;
+let gameScore = 0;
+let gameLives = 3;
+let gameSpeed = 4;
+let mickeyY = 300;
+let mickeyVelY = 0;
+let isJumping = false;
+let obstacles = [];
+let words = [];
+let frameCount = 0;
+let canvas, ctx;
+let gameLoopId;
+let spawnTimer = 0;
+let gameWords = [
+    { en: "cat", ru: "кошка" },
+    { en: "dog", ru: "собака" },
+    { en: "house", ru: "дом" },
+    { en: "car", ru: "машина" },
+    { en: "book", ru: "книга" },
+    { en: "apple", ru: "яблоко" },
+    { en: "run", ru: "бежать" },
+    { en: "eat", ru: "есть" },
+    { en: "sleep", ru: "спать" },
+    { en: "water", ru: "вода" },
+    { en: "sun", ru: "солнце" },
+    { en: "moon", ru: "луна" },
+    { en: "star", ru: "звезда" },
+    { en: "happy", ru: "счастливый" },
+    { en: "sad", ru: "грустный" }
+];
+
+function renderGamePage(main) {
+    main.innerHTML = `
+        <div class="card" style="max-width:600px; padding:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <span id="gameScore">⭐ 0</span>
+                <span id="gameLives">❤️❤️❤️</span>
+                <span id="gameBest">🏆 ${localStorage.getItem('mickeyRunnerBest') || 0}</span>
+            </div>
+            <canvas id="gameCanvas" width="380" height="400" 
+                style="width:100%; height:auto; border:2px solid var(--border); image-rendering:pixelated; background:#87CEEB;">
+            </canvas>
+            <p style="font-size:7px; margin-top:8px; color:var(--text);">
+                🖱️ Тап / клик — прыжок<br>Собирай правильные переводы!
+            </p>
+            <button onclick="startGame()" id="gameStartBtn" style="margin-top:5px;">▶️ Играть</button>
+            <button onclick="shareGameScore()" id="gameShareBtn" style="display:none; margin-top:5px;">📤 Поделиться рекордом</button>
+        </div>`;
+}
+
+function startGame() {
+    canvas = document.getElementById('gameCanvas');
+    ctx = canvas.getContext('2d');
+    gameScore = 0;
+    gameLives = 3;
+    gameSpeed = 4;
+    mickeyY = 280;
+    mickeyVelY = 0;
+    isJumping = false;
+    obstacles = [];
+    words = [];
+    frameCount = 0;
+    spawnTimer = 0;
+    gameRunning = true;
+    document.getElementById('gameStartBtn').style.display = 'none';
+    document.getElementById('gameShareBtn').style.display = 'none';
+    updateGameHUD();
+    canvas.addEventListener('click', handleGameJump);
+    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); handleGameJump(); });
+    gameLoopId = requestAnimationFrame(gameLoop);
+}
+
+function handleGameJump() {
+    if (!gameRunning) return;
+    if (!isJumping) {
+        mickeyVelY = -12;
+        isJumping = true;
+    }
+}
+
+function gameLoop() {
+    if (!gameRunning) return;
+    updateGame();
+    drawGame();
+    gameLoopId = requestAnimationFrame(gameLoop);
+}
+
+function updateGame() {
+    frameCount++;
+    // Гравитация
+    mickeyVelY += 0.6;
+    mickeyY += mickeyVelY;
+    if (mickeyY >= 280) {
+        mickeyY = 280;
+        mickeyVelY = 0;
+        isJumping = false;
+    }
+
+    // Спавн препятствий и слов
+    spawnTimer++;
+    if (spawnTimer > 80 - gameSpeed * 5) {
+        spawnTimer = 0;
+        if (Math.random() < 0.5) {
+            // Препятствие
+            obstacles.push({ x: 400, y: 280, w: 20, h: 30 });
+        } else {
+            // Слово
+            const wordPair = gameWords[Math.floor(Math.random() * gameWords.length)];
+            const isCorrect = Math.random() < 0.5;
+            words.push({
+                x: 400,
+                y: 150 + Math.random() * 100,
+                text: isCorrect ? wordPair.ru : wordPair.en,
+                correct: isCorrect,
+                pair: wordPair,
+                collected: false
+            });
+        }
+    }
+
+    // Движение препятствий
+    for (let obs of obstacles) {
+        obs.x -= gameSpeed;
+        // Проверка столкновения с Микки
+        if (
+            obs.x < 50 && obs.x + obs.w > 20 &&
+            mickeyY + 40 > obs.y && mickeyY < obs.y + obs.h
+        ) {
+            gameLives--;
+            obstacles = obstacles.filter(o => o !== obs);
+            updateGameHUD();
+            if (gameLives <= 0) {
+                gameOver();
+                return;
+            }
+        }
+    }
+    obstacles = obstacles.filter(obs => obs.x > -50);
+
+    // Движение слов
+    for (let w of words) {
+        w.x -= gameSpeed;
+        // Проверка сбора
+        if (!w.collected && w.x < 50 && w.x > 10 &&
+            mickeyY + 40 > w.y - 10 && mickeyY < w.y + 30) {
+            w.collected = true;
+            if (w.correct) {
+                gameScore += 10;
+                updateGameHUD();
+            } else {
+                gameLives--;
+                updateGameHUD();
+                if (gameLives <= 0) {
+                    gameOver();
+                    return;
+                }
+            }
+        }
+    }
+    words = words.filter(w => w.x > -50 && !w.collected);
+
+    // Увеличение скорости
+    if (gameScore > 0 && gameScore % 50 === 0) {
+        gameSpeed += 0.2;
+    }
+}
+
+function drawGame() {
+    ctx.clearRect(0, 0, 380, 400);
+
+    // Небо
+    ctx.fillStyle = '#87CEEB';
+    ctx.fillRect(0, 0, 380, 280);
+    // Земля
+    ctx.fillStyle = '#8B4513';
+    ctx.fillRect(0, 310, 380, 90);
+
+    // Микки (пиксельный кот)
+    ctx.fillStyle = '#FFD9B0';
+    ctx.fillRect(30, mickeyY, 20, 20); // тело
+    ctx.fillStyle = '#000';
+    ctx.fillRect(32, mickeyY + 4, 4, 4); // глаз
+    ctx.fillRect(40, mickeyY + 4, 4, 4); // глаз
+    ctx.fillStyle = '#FFC489';
+    ctx.fillRect(26, mickeyY + 12, 6, 4); // лапа
+    ctx.fillRect(44, mickeyY + 12, 6, 4); // лапа
+
+    // Препятствия
+    ctx.fillStyle = '#555';
+    for (let obs of obstacles) {
+        ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
+        // шипы
+        ctx.fillStyle = '#FF0000';
+        ctx.fillRect(obs.x + 2, obs.y - 5, 4, 5);
+        ctx.fillRect(obs.x + 14, obs.y - 5, 4, 5);
+        ctx.fillStyle = '#555';
+    }
+
+    // Слова
+    ctx.font = '10px "Press Start 2P"';
+    for (let w of words) {
+        ctx.fillStyle = w.correct ? '#00AA00' : '#AA0000';
+        ctx.fillText(w.text, w.x, w.y);
+    }
+
+    // HUD внутри canvas (мелкий шрифт)
+    ctx.fillStyle = '#000';
+    ctx.font = '8px "Press Start 2P"';
+    ctx.fillText('⭐ ' + gameScore, 10, 15);
+    ctx.fillText('❤️'.repeat(gameLives), 300, 15);
+}
+
+function updateGameHUD() {
+    document.getElementById('gameScore').textContent = '⭐ ' + gameScore;
+    document.getElementById('gameLives').textContent = '❤️'.repeat(gameLives) + '🖤'.repeat(3 - gameLives);
+    document.getElementById('gameBest').textContent = '🏆 ' + (localStorage.getItem('mickeyRunnerBest') || 0);
+}
+
+function gameOver() {
+    gameRunning = false;
+    cancelAnimationFrame(gameLoopId);
+    canvas.removeEventListener('click', handleGameJump);
+    canvas.removeEventListener('touchstart', handleGameJump);
+    document.getElementById('gameStartBtn').style.display = 'inline-block';
+    document.getElementById('gameStartBtn').textContent = '🔄 Заново';
+    document.getElementById('gameShareBtn').style.display = 'inline-block';
+    const best = parseInt(localStorage.getItem('mickeyRunnerBest') || 0);
+    if (gameScore > best) {
+        localStorage.setItem('mickeyRunnerBest', gameScore);
+        document.getElementById('gameBest').textContent = '🏆 ' + gameScore;
+    }
+    updateGameHUD();
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.fillRect(0, 0, 380, 400);
+    ctx.fillStyle = '#FFF';
+    ctx.font = '12px "Press Start 2P"';
+    ctx.fillText('GAME OVER', 120, 180);
+    ctx.font = '8px "Press Start 2P"';
+    ctx.fillText('Score: ' + gameScore, 150, 210);
+}
+
+function shareGameScore() {
+    const best = localStorage.getItem('mickeyRunnerBest') || 0;
+    const text = `🐱 Я набрал ${gameScore} очков в Mickey Runner! (Рекорд: ${best})\nПопробуй Englify: https://t.me/engliFLY_bot`;
+    if (navigator.share) {
+        navigator.share({ title: 'Mickey Runner', text: text });
+    } else {
+        // Копируем в буфер обмена
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Результат скопирован! Отправь другу.');
+        });
+    }
+}
+
+
+
 
         // ===== ЗАПУСК =====
         renderPage();
