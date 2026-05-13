@@ -495,40 +495,24 @@ def generate_tasks(day_index: int, level: str):
     trans = word_data["translation"]
     ex = word_data["example"]
     ex_trans = word_data["example_translation"]
-    # фиксируем генератор для детерминированности заданий конкретного дня
-    random.seed(f"{day_index}_{level}")
-    pool_trans = [wd["translation"] for wd in WORDS_OF_DAY if wd["translation"] != trans]
-    fake1, fake2 = random.sample(pool_trans, 2)
-    tasks = []
-    if level == "novice":
-    # Собираем пулы
-      eng_words_pool = [wd["word"] for wd in WORDS_OF_DAY if wd["word"] != w]
-      pool_trans = [wd["translation"] for wd in WORDS_OF_DAY if wd["translation"] != trans]
 
-    # Фейковые русские переводы (для заданий 1 и 3)
+    random.seed(f"{day_index}_{level}")
+
+    eng_words_pool = [wd["word"] for wd in WORDS_OF_DAY if wd["word"] != w]
+    pool_trans = [wd["translation"] for wd in WORDS_OF_DAY if wd["translation"] != trans]
+
     if len(pool_trans) >= 2:
         fake1, fake2 = random.sample(pool_trans, 2)
     else:
         fake1, fake2 = "перевод1", "перевод2"
 
-    # Фейковые английские слова (для задания 2)
-        if level == "novice":
-        # Собираем пулы
-        eng_words_pool = [wd["word"] for wd in WORDS_OF_DAY if wd["word"] != w]
-        pool_trans = [wd["translation"] for wd in WORDS_OF_DAY if wd["translation"] != trans]
+    if len(eng_words_pool) >= 2:
+        random_eng1, random_eng2 = random.sample(eng_words_pool, 2)
+    else:
+        random_eng1, random_eng2 = "word1", "word2"
 
-        # Фейковые русские переводы (для заданий 1 и 3)
-        if len(pool_trans) >= 2:
-            fake1, fake2 = random.sample(pool_trans, 2)
-        else:
-            fake1, fake2 = "перевод1", "перевод2"
-
-        # Фейковые английские слова (для задания 2)
-        if len(eng_words_pool) >= 2:
-            random_eng1, random_eng2 = random.sample(eng_words_pool, 2)
-        else:
-            random_eng1, random_eng2 = "word1", "word2"
-
+    tasks = []
+    if level == "novice":
         for t in NOVICE_TEMPLATES:
             q = t["question"].format(
                 word=w, translation=trans,
@@ -552,31 +536,47 @@ def generate_tasks(day_index: int, level: str):
         syn = SYNONYMS.get(w, "relevant word")
         ant = ANTONYMS.get(w, "opposite")
         random_word = random.choice([wd["word"] for wd in WORDS_OF_DAY if wd["word"] != w])
-        # вычисляем форму gerund (упрощённо)
         gerund = w + "ing" if not w.endswith("e") else w[:-1] + "ing"
         for t in MIDDLE_TEMPLATES:
-            q = t["question"].format(word=w, synonym=syn, antonym=ant, random_word=random_word,
-                                     word_gerund=gerund, example=ex, example_translation=ex_trans,
-                                     fake_trans1=fake1, fake_trans2=fake2)
-            opts = [opt.format(word=w, synonym=syn, antonym=ant, random_word=random_word,
-                               word_gerund=gerund, example=ex, example_translation=ex_trans,
-                               fake_trans1=fake1, fake_trans2=fake2) for opt in t["options"]]
-            tasks.append({"question": q, "options": opts, "correct": t["correct"], "word": w})
+            q = t["question"].format(
+                word=w, synonym=syn, antonym=ant, random_word=random_word,
+                word_gerund=gerund, example=ex, example_translation=ex_trans,
+                fake_trans1=fake1, fake_trans2=fake2
+            )
+            opts = [opt.format(
+                word=w, synonym=syn, antonym=ant, random_word=random_word,
+                word_gerund=gerund, example=ex, example_translation=ex_trans,
+                fake_trans1=fake1, fake_trans2=fake2
+            ) for opt in t["options"]]
+            tasks.append({
+                "question": q,
+                "options": opts,
+                "correct": t["correct"],
+                "word": w
+            })
     elif level == "pro":
-        # Идиомы и сложные конструкции
         idiom = f"to {w} the boat" if w == "rock" else f"{w} the bullet" if w == "bite" else f"out of the {w}"
         fake_idiom1, fake_idiom2 = "fake idiom one", "another fake"
         complex_sentence = f"He finally decided to {w} the situation." if "the" not in w else f"She couldn't {w}."
         paraphrase = f"A different way of saying '{ex}'"
         for t in PRO_TEMPLATES:
-            q = t["question"].format(word=w, idiom=idiom, fake_idiom1=fake_idiom1, fake_idiom2=fake_idiom2,
-                                     complex_sentence=complex_sentence, example=ex, paraphrase=paraphrase,
-                                     bad_paraphrase="Wrong paraphrase", wrong_meaning="Incorrect meaning",
-                                     distractor1=fake1, distractor2=fake2)
-            opts = [opt.format(word=w, idiom=idiom, fake_idiom1=fake_idiom1, fake_idiom2=fake_idiom2,
-                               complex_sentence=complex_sentence, example=ex, paraphrase=paraphrase,
-                               bad_paraphrase="Wrong paraphrase", wrong_meaning="Incorrect meaning",
-                               distractor1=fake1, distractor2=fake2) for opt in t["options"]]
-            tasks.append({"question": q, "options": opts, "correct": t["correct"], "word": w})
+            q = t["question"].format(
+                word=w, idiom=idiom, fake_idiom1=fake_idiom1, fake_idiom2=fake_idiom2,
+                complex_sentence=complex_sentence, example=ex, paraphrase=paraphrase,
+                bad_paraphrase="Wrong paraphrase", wrong_meaning="Incorrect meaning",
+                distractor1=fake1, distractor2=fake2
+            )
+            opts = [opt.format(
+                word=w, idiom=idiom, fake_idiom1=fake_idiom1, fake_idiom2=fake_idiom2,
+                complex_sentence=complex_sentence, example=ex, paraphrase=paraphrase,
+                bad_paraphrase="Wrong paraphrase", wrong_meaning="Incorrect meaning",
+                distractor1=fake1, distractor2=fake2
+            ) for opt in t["options"]]
+            tasks.append({
+                "question": q,
+                "options": opts,
+                "correct": t["correct"],
+                "word": w
+            })
     random.seed()
     return tasks
