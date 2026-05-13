@@ -151,7 +151,15 @@
     margin-top: 10px;
 }
 
+.game-window {
+    position: relative;
+    z-index: 20;
+}
 
+canvas {
+    position: relative;
+    z-index: 21;
+}
 
     </style>
 </head>
@@ -576,7 +584,7 @@ let gameWords = [
 
 function renderGamePage(main) {
     main.innerHTML = `
-        <div style="display:flex; justify-content:center; align-items:center; min-height:70vh;">
+    <div class="game-window" style="display:flex; justify-content:center; align-items:center; min-height:70vh;">
             <!-- Окно в стиле Mac OS -->
             <div style="
                 background: #f0f0f0;
@@ -905,7 +913,7 @@ function renderWordBuilderPage(main) {
     builderScore = 0;
     pickBuilderWord();
     main.innerHTML = `
-        <div style="max-width:500px; margin:auto;">
+        <div class="game-window" style="max-width:500px; margin:auto;">
             <div style="background:#f0f0f0; border:3px solid #555; border-radius:8px; box-shadow:6px 6px 0 #333; padding:0;">
                 <div style="background:#ddd; padding:8px 12px; display:flex; align-items:center; gap:8px; border-bottom:3px solid #999;">
                     <button onclick="showPage('word')" style="width:14px;height:14px;background:#ff5f57;border:2px solid #cc0000;border-radius:0;cursor:pointer;padding:0;font-size:0;"></button>
