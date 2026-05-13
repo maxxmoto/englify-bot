@@ -1029,7 +1029,11 @@ function checkBuilderWord() {
         builderScore += 10;
         document.getElementById('builderScore').textContent = builderScore;
         if (msg) msg.textContent = '✅ Правильно! Микки рад! 🐱';
-        setTimeout(() => { resetBuilder(); if (msg) msg.textContent = ''; }, 1000);
+        
+        // Запускаем конфетти
+        spawnConfetti();
+        
+        setTimeout(() => { resetBuilder(); if (msg) msg.textContent = ''; }, 1200);
     } else {
         builderLives--;
         updateBuilderLives();
@@ -1040,6 +1044,64 @@ function checkBuilderWord() {
             if (msg) msg.textContent = '❌ Неправильно! Осталось жизней: ' + builderLives;
             setTimeout(() => { resetBuilder(); if (msg) msg.textContent = ''; }, 1000);
         }
+    }
+}
+
+// ===== КОНФЕТТИ =====
+function spawnConfetti() {
+    const colors = ['#ff5f57', '#ffbd2e', '#27c93f', '#4a90d9', '#ff6fb5', '#f0b27a', '#a29bfe', '#fd79a8'];
+    const container = document.querySelector('.game-window') || document.body;
+    
+    for (let i = 0; i < 40; i++) {
+        const confetti = document.createElement('div');
+        const size = Math.random() * 10 + 6;
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const startX = Math.random() * 100;
+        const startY = -20;
+        const angle = (Math.random() - 0.5) * 60;
+        const velocity = Math.random() * 4 + 3;
+        const rotation = Math.random() * 720;
+        
+        confetti.style.cssText = `
+            position: fixed;
+            left: ${startX}%;
+            top: ${startY}px;
+            width: ${size}px;
+            height: ${size}px;
+            background: ${color};
+            border: 2px solid rgba(0,0,0,0.3);
+            image-rendering: pixelated;
+            pointer-events: none;
+            z-index: 9999;
+            animation: confettiFall ${Math.random() * 1.5 + 1.5}s ease-out forwards;
+            transform: rotate(0deg);
+        `;
+        
+        container.appendChild(confetti);
+        
+        // Добавляем уникальную анимацию для каждого кусочка
+        const keyframes = `
+            @keyframes confettiFall {
+                0% {
+                    transform: translateY(0) translateX(0) rotate(0deg);
+                    opacity: 1;
+                }
+                100% {
+                    transform: translateY(${window.innerHeight + 50}px) translateX(${angle * 5}px) rotate(${rotation}deg);
+                    opacity: 0;
+                }
+            }
+        `;
+        
+        const style = document.createElement('style');
+        style.textContent = keyframes;
+        document.head.appendChild(style);
+        
+        // Удаляем конфетти после анимации
+        setTimeout(() => {
+            confetti.remove();
+            style.remove();
+        }, 3000);
     }
 }
 
