@@ -361,7 +361,6 @@ async def add_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"Пользователь {target_id} теперь Pro.")
     except:
         await update.message.reply_text("Использование: /addpro user_id")
-
 # ---------- ЗАПУСК ----------
 if __name__ == "__main__":
     if platform.system() == "Windows":
@@ -373,6 +372,13 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("addpro", add_pro))
     app.add_handler(CallbackQueryHandler(button_handler))
+
+    # Добавляем команду /word для принудительной отправки слова дня (для проверки)
+    async def manual_word(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        await daily_job(app)
+        await update.message.reply_text("Слово дня отправлено всем пользователям!")
+
+    app.add_handler(CommandHandler("word", manual_word))
 
     loop = asyncio.get_event_loop()
     loop.create_task(scheduler(app))
