@@ -147,6 +147,7 @@ async def daily_job(app):
         )
         keyboard = [
             [InlineKeyboardButton(_("✅ Выучил", "✅ Learned", lang), callback_data=f"learned_{word_data['word']}")],
+            [InlineKeyboardButton(_("🔊 Озвучить", "🔊 Listen", lang), callback_data=f"voice_{word_data['word']}")],
             [InlineKeyboardButton(_("📋 Мои слова", "📋 My words", lang), callback_data="menu_words")]
         ]
         try:
@@ -224,6 +225,13 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 _("Тест завершён! Твой уровень: ", "Test finished! Your level: ", lang) + level_names[level],
                 reply_markup=main_menu_keyboard(lang)
             )
+
+elif data.startswith("voice_"):
+    word = data[6:]  # убираем "voice_"
+    await send_voice_word(uid, word, lang, context)
+    await query.answer("🔊 Отправляю голосовое...")
+
+
     elif data == "choose_level":
         keyboard = [
             [InlineKeyboardButton(_("🟢 Новичок", "🟢 Novice", lang), callback_data="set_novice"),
@@ -419,6 +427,30 @@ async def add_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"Пользователь {target_id} теперь Pro.")
     except:
         await update.message.reply_text("Использование: /addpro user_id")
+
+
+
+from gtts import gTTS
+import io
+
+async def send_voice_word(chat_id, word, lang, context):
+    """Озвучивает слово и отправляет голосовое сообщение"""
+    try:
+        # Создаём аудио в памяти
+        tts = gTTS(text=word, lang='en', slow=False)
+        audio_bytes = io.BytesIO()
+        tts.write_to_fp(audio_bytes)
+        audio_bytes.seek(0)
+        
+        # Отправляем как голосовое сообщение
+        await context.bot.send_voice(
+            chat_id=chat_id,
+            voice=audio_bytes,
+            caption=f"🔊 {word}"
+        )
+    except Exception as e:
+        print(f"Ошибка озвучки: {e}")
+
 
 # ---------- ЗАПУСК ----------
 if __name__ == "__main__":
