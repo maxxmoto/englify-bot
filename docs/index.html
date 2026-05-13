@@ -83,6 +83,76 @@
         .modal.show { display: flex; }
         .modal-content { background: var(--modal-bg); border: 4px solid var(--border); padding: 25px; max-width: 600px; width: 100%; font-size: 9px; line-height: 1.6; position: relative; flex-direction: column; align-items: center; text-align: center; }
         .close-btn { position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 22px; cursor: pointer; color: var(--text); }
+
+
+/* Word Builder */
+.builder-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    padding: 10px;
+}
+.letter-pool {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    min-height: 50px;
+}
+.letter-block {
+    width: 48px;
+    height: 48px;
+    background: var(--accent);
+    border: 3px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-family: 'Press Start 2P', cursive;
+    cursor: grab;
+    user-select: none;
+    box-shadow: 3px 3px 0 #d9a36a;
+    transition: transform 0.1s;
+    position: relative;
+    z-index: 10;
+}
+.letter-block:active {
+    cursor: grabbing;
+    transform: scale(1.1);
+}
+.slots {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+}
+.slot {
+    width: 48px;
+    height: 48px;
+    border: 3px dashed var(--border);
+    background: var(--card-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-family: 'Press Start 2P', cursive;
+}
+.slot.filled {
+    border-style: solid;
+    background: var(--accent);
+}
+.dragging {
+    opacity: 0.7;
+    z-index: 100;
+}
+.word-builder-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+
+
     </style>
 </head>
 <body class="theme-day">
@@ -112,7 +182,8 @@
             <a href="#" onclick="showPage('grammar')">📘 Грамматика</a>
             <a href="#" onclick="showPage('words')">📚 Словарь</a>
             <a href="#" onclick="showPage('pro')">⭐ Pro</a>
-            <a href="#" onclick="showPage('game')">🎮 Игра</a>
+            <a href="#" onclick="showPage('game')">🎮 Mikki runner</a>
+	    <a href="#" onclick="showPage('builder')">🧩 Word Builder</a>
         </div>
     </header>
 
@@ -185,6 +256,7 @@
                 case 'words': renderWordsPage(main); break;
                 case 'pro': renderProPage(main); break;
 	        case 'game': renderGamePage(main); break;
+	        case 'builder': renderWordBuilderPage(main); break;
                 default: renderWordPage(main);
             }
         }
@@ -804,7 +876,191 @@ function shareGameScore() {
     }
 }
 
+// ===== WORD BUILDER GAME =====
+let builderWords = [
+    { en: "cat", ru: "кошка" },
+    { en: "dog", ru: "собака" },
+    { en: "house", ru: "дом" },
+    { en: "car", ru: "машина" },
+    { en: "book", ru: "книга" },
+    { en: "apple", ru: "яблоко" },
+    { en: "sun", ru: "солнце" },
+    { en: "moon", ru: "луна" },
+    { en: "star", ru: "звезда" },
+    { en: "happy", ru: "счастливый" }
+];
+let builderCurrentWord = null;
+let builderLives = 3;
+let builderScore = 0;
+let builderSlots = [];
+let builderPoolLetters = [];
+let builderDragging = null;
+let builderOffsetX = 0, builderOffsetY = 0;
 
+function renderWordBuilderPage(main) {
+    builderLives = 3;
+    builderScore = 0;
+    pickBuilderWord();
+    main.innerHTML = `
+        <div class="game-window" style="max-width:500px; margin:auto;">
+            <div style="background:#f0f0f0; border:3px solid #555; border-radius:8px; box-shadow:6px 6px 0 #333; padding:0;">
+                <div style="background:#ddd; padding:8px 12px; display:flex; align-items:center; gap:8px; border-bottom:3px solid #999;">
+                    <button onclick="showPage('word')" style="width:14px;height:14px;background:#ff5f57;border:2px solid #cc0000;border-radius:0;cursor:pointer;padding:0;font-size:0;"></button>
+                    <button onclick="showPage('word')" style="width:14px;height:14px;background:#ffbd2e;border:2px solid #cc8800;border-radius:0;cursor:pointer;padding:0;font-size:0;"></button>
+                    <button onclick="alert('И так хорошо!')" style="width:14px;height:14px;background:#27c93f;border:2px solid #008800;border-radius:0;cursor:pointer;padding:0;font-size:0;"></button>
+                    <span style="font-size:8px;color:#333;margin-left:10px;flex:1;text-align:center;">Word Builder</span>
+                </div>
+                <div style="padding:15px; background:#fff;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:8px;">
+                        <span>⭐ <span id="builderScore">0</span></span>
+                        <span id="builderLives">❤️❤️❤️</span>
+                    </div>
+                    <p style="font-size:8px; text-align:center;">Собери слово: <strong>${builderCurrentWord.ru}</strong></p>
+                    <div class="builder-container">
+                        <div class="slots" id="slotsContainer"></div>
+                        <div class="letter-pool" id="letterPool"></div>
+                    </div>
+                    <div class="word-builder-buttons">
+                        <button onclick="checkBuilderWord()" style="font-size:8px;">✅ Проверить</button>
+                        <button onclick="resetBuilder()" style="font-size:8px;">🔄 Сбросить</button>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    initBuilder();
+}
+
+function pickBuilderWord() {
+    builderCurrentWord = builderWords[Math.floor(Math.random() * builderWords.length)];
+}
+
+function initBuilder() {
+    // Создаём слоты под каждую букву
+    const slotsContainer = document.getElementById('slotsContainer');
+    slotsContainer.innerHTML = '';
+    builderSlots = [];
+    for (let i = 0; i < builderCurrentWord.en.length; i++) {
+        const slot = document.createElement('div');
+        slot.className = 'slot';
+        slot.dataset.index = i;
+        slot.addEventListener('dragover', (e) => e.preventDefault());
+        slot.addEventListener('drop', onDrop);
+        slotsContainer.appendChild(slot);
+        builderSlots.push({ element: slot, letter: null });
+    }
+
+    // Создаём пул перемешанных букв
+    const letters = builderCurrentWord.en.split('');
+    // Добавим пару лишних случайных букв для сложности
+    const extraLetters = 'abcdefghijklmnopqrstuvwxyz'.split('');
+    for (let i = 0; i < 3; i++) {
+        letters.push(extraLetters[Math.floor(Math.random() * extraLetters.length)]);
+    }
+    // Перемешиваем
+    for (let i = letters.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [letters[i], letters[j]] = [letters[j], letters[i]];
+    }
+    builderPoolLetters = letters;
+    renderPool();
+}
+
+function renderPool() {
+    const pool = document.getElementById('letterPool');
+    pool.innerHTML = '';
+    builderPoolLetters.forEach((letter, index) => {
+        const block = document.createElement('div');
+        block.className = 'letter-block';
+        block.textContent = letter;
+        block.draggable = true;
+        block.dataset.letter = letter;
+        block.dataset.poolIndex = index;
+        block.addEventListener('dragstart', onDragStart);
+        block.addEventListener('dragend', onDragEnd);
+        pool.appendChild(block);
+    });
+    updateSlots();
+}
+
+function onDragStart(e) {
+    builderDragging = e.target;
+    e.dataTransfer.setData('text/plain', e.target.dataset.letter);
+    setTimeout(() => e.target.classList.add('dragging'), 0);
+}
+
+function onDragEnd(e) {
+    e.target.classList.remove('dragging');
+    builderDragging = null;
+}
+
+function onDrop(e) {
+    e.preventDefault();
+    const letter = e.dataTransfer.getData('text/plain');
+    const slotIndex = e.target.dataset.index;
+    if (slotIndex === undefined) return;
+    const slot = builderSlots[slotIndex];
+    if (slot.letter !== null) {
+        // Возвращаем букву обратно в пул
+        builderPoolLetters.push(slot.letter);
+        slot.letter = null;
+        renderPool();
+        return;
+    }
+    // Удаляем букву из пула
+    const poolIndex = builderPoolLetters.indexOf(letter);
+    if (poolIndex > -1) {
+        builderPoolLetters.splice(poolIndex, 1);
+        slot.letter = letter;
+        slot.element.textContent = letter;
+        slot.element.classList.add('filled');
+        renderPool();
+    }
+}
+
+function updateSlots() {
+    builderSlots.forEach((slot, i) => {
+        if (slot.letter) {
+            slot.element.textContent = slot.letter;
+            slot.element.classList.add('filled');
+        } else {
+            slot.element.textContent = '';
+            slot.element.classList.remove('filled');
+        }
+    });
+}
+
+function checkBuilderWord() {
+    const userWord = builderSlots.map(s => s.letter).join('');
+    if (userWord === builderCurrentWord.en) {
+        builderScore += 10;
+        document.getElementById('builderScore').textContent = builderScore;
+        alert('Правильно! Микки рад! 🐱');
+        resetBuilder();
+    } else {
+        builderLives--;
+        updateBuilderLives();
+        if (builderLives <= 0) {
+            alert('Игра окончена! Твой счёт: ' + builderScore);
+            showPage('word');
+        } else {
+            alert('Неправильно! Осталось жизней: ' + builderLives);
+            resetBuilder();
+        }
+    }
+}
+
+function resetBuilder() {
+    pickBuilderWord();
+    initBuilder();
+    document.querySelector('.word-builder-buttons').previousElementSibling.querySelector('strong').textContent = builderCurrentWord.ru;
+}
+
+function updateBuilderLives() {
+    const livesEl = document.getElementById('builderLives');
+    if (livesEl) {
+        livesEl.textContent = '❤️'.repeat(builderLives) + '🖤'.repeat(3 - builderLives);
+    }
+}
 
 
         // ===== ЗАПУСК =====
