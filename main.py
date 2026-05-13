@@ -2,6 +2,7 @@ import sqlite3
 import asyncio
 import os
 import platform
+import random
 from datetime import datetime, date
 import pytz
 from dotenv import load_dotenv
@@ -9,6 +10,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
 from content import get_daily_word, generate_tasks
 from test_data import TEST_QUESTIONS
+from irregular_verbs import IRREGULAR_VERBS
 
 load_dotenv()
 TOKEN = os.getenv("BOT_TOKEN")
@@ -110,14 +112,15 @@ def _(text_ru, text_en, lang):
 
 def main_menu_keyboard(lang):
     labels = {
-        'ru': {"tasks": "📝 Задания", "words": "📚 Мои слова", "level": "🎚 Уровень",
-               "mode": "🌐 Режим", "pro": "⭐ Pro"},
-        'en': {"tasks": "📝 Tasks", "words": "📚 My words", "level": "🎚 Level",
-               "mode": "🌐 Mode", "pro": "⭐ Pro"}
+        'ru': {"tasks": "📝 Задания", "verbs": "🐾 Глаголы", "words": "📚 Мои слова",
+               "level": "🎚 Уровень", "mode": "🌐 Режим", "pro": "⭐ Pro"},
+        'en': {"tasks": "📝 Tasks", "verbs": "🐾 Verbs", "words": "📚 My words",
+               "level": "🎚 Level", "mode": "🌐 Mode", "pro": "⭐ Pro"}
     }
     l = labels[lang]
     keyboard = [
         [InlineKeyboardButton(l["tasks"], callback_data="menu_tasks")],
+        [InlineKeyboardButton(l["verbs"], callback_data="menu_verbs")],
         [InlineKeyboardButton(l["words"], callback_data="menu_words")],
         [InlineKeyboardButton(l["level"], callback_data="menu_level"),
          InlineKeyboardButton(l["mode"], callback_data="menu_mode")],
@@ -155,10 +158,8 @@ async def daily_job(app):
 # ---------- ПЛАНИРОВЩИК ----------
 async def scheduler(app):
     sent_today = False
-    # При старте проверяем, не нужно ли немедленно отправить слово дня
     now = datetime.now(MOSCOW_TZ)
     if now.hour >= 9 and not sent_today:
-        # Если уже сегодня 9:00 или позже, отправляем слово
         await daily_job(app)
         sent_today = True
     while True:
@@ -335,6 +336,63 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             hint = "Нет задания"
         await query.answer(hint, show_alert=True)
 
+    # ---------- ТРЕНАЖЁР ГЛАГОЛОВ ----------
+    elif data == "menu_verbs":
+        context.user_data["verb_score"] = 0
+        context.user_data["verb_index"] = 0
+        verbs = random.sample(IRREGULAR_VERBS, min(10, len(IRREGULAR_VERBS)))
+        context.user_data["verbs"] = verbs
+        await ask_verb_question(query, context, lang)
+    elif data.startswith("verb_"):
+        parts = data.split("_", 1)  # verb_answer_0 или verb_answer_1 и т.д.
+        if len(parts) < 2:
+            return
+        answer_idx = int(parts[1])
+        verbs = context.user_data.get("verbs")
+        idx = context.user_data.get("verb_index", 0)
+        if not verbs or idx >= len(verbs):
+            return
+        current_verb = verbs[idx]
+        # В текущем вопросе правильный ответ хранится в user_data
+        correct_idx = context.user_data.get("verb_correct_idx", 0)
+        correct = (answer_idx == correct_idx)
+        if correct:
+            context.user_data["verb_score"] = context.user_data.get("verb_score", 0) + 1
+        feedback = _("✅ Верно!", "✅ Correct!", lang) if correct else _("❌ Ошибка", "❌ Wrong", lang)
+        context.user_data["verb_index"] = idx + 1
+        if idx + 1 < len(verbs):
+            await ask_verb_question(query, context, lang, prefix=feedback + "\n\n")
+        else:
+            total_score = context.user_data.get("verb_score", 0)
+            await query.edit_message_text(
+                feedback + "\n\n" +
+                _("🎉 Тренировка завершена! Правильных: ", "🎉 Training finished! Correct: ", lang) +
+                f"{total_score}/{len(verbs)}",
+                reply_markup=main_menu_keyboard(lang)
+            )
+
+async def ask_verb_question(query, context, lang, prefix=""):
+    verbs = context.user_data.get("verbs")
+    idx = context.user_data.get("verb_index", 0)
+    if not verbs or idx >= len(verbs):
+        return
+    verb = verbs[idx]
+    # Варианты: правильная форма V3, случайные другие V3
+    correct_form = verb["v3"]
+    other_forms = [v["v3"] for v in IRREGULAR_VERBS if v["v3"] != correct_form]
+    random_forms = random.sample(other_forms, min(2, len(other_forms)))
+    options = [correct_form] + random_forms
+    random.shuffle(options)
+    correct_idx = options.index(correct_form)
+    context.user_data["verb_correct_idx"] = correct_idx
+    question_text = _(
+        f"🐱 Микки: Какая третья форма глагола **{verb['v1']}** ({verb['translation']})?\n( {verb['v1']} - {verb['v2']} - ??? )",
+        f"🐱 Mickey: What's the V3 for **{verb['v1']}** ({verb['translation']})?\n( {verb['v1']} - {verb['v2']} - ??? )",
+        lang
+    )
+    buttons = [[InlineKeyboardButton(opt, callback_data=f"verb_{i}")] for i, opt in enumerate(options)]
+    await query.edit_message_text(prefix + question_text, reply_markup=InlineKeyboardMarkup(buttons))
+
 async def send_test_question(query, context, uid, lang):
     idx = context.user_data["test_index"]
     q = TEST_QUESTIONS[idx]
@@ -361,6 +419,7 @@ async def add_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"Пользователь {target_id} теперь Pro.")
     except:
         await update.message.reply_text("Использование: /addpro user_id")
+
 # ---------- ЗАПУСК ----------
 if __name__ == "__main__":
     if platform.system() == "Windows":
@@ -373,10 +432,9 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("addpro", add_pro))
     app.add_handler(CallbackQueryHandler(button_handler))
 
-    # Добавляем команду /word для принудительной отправки слова дня (для проверки)
+    # /word без лишнего сообщения
     async def manual_word(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await daily_job(app)
-        await update.message.reply_text("Слово дня отправлено всем пользователям!")
 
     app.add_handler(CommandHandler("word", manual_word))
 
