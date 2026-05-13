@@ -11,6 +11,8 @@ from telegram.ext import Application, CommandHandler, CallbackQueryHandler, Cont
 from content import get_daily_word, generate_tasks
 from test_data import TEST_QUESTIONS
 from irregular_verbs import IRREGULAR_VERBS
+from gtts import gTTS
+import io
 
 load_dotenv()
 TOKEN = os.getenv("BOT_TOKEN")
@@ -226,10 +228,10 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 reply_markup=main_menu_keyboard(lang)
             )
 
-elif data.startswith("voice_"):
-    word = data[6:]  # убираем "voice_"
-    await send_voice_word(uid, word, lang, context)
-    await query.answer("🔊 Отправляю голосовое...")
+    elif data.startswith("voice_"):
+    	word = data[6:]  # убираем "voice_"
+    	await send_voice_word(uid, word, lang, context)
+    	await query.answer("🔊 Отправляю голосовое...")
 
 
     elif data == "choose_level":
@@ -429,9 +431,6 @@ async def add_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Использование: /addpro user_id")
 
 
-
-from gtts import gTTS
-import io
 
 async def send_voice_word(chat_id, word, lang, context):
     """Озвучивает слово и отправляет голосовое сообщение"""
