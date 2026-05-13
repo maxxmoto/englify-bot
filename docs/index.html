@@ -6,14 +6,15 @@
     <title>Englify – учи английский с Микки</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
-        /* ===== ВСЕ СТИЛИ (пиксельный Englify) ===== */
         :root {
             --bg: #fefaf3; --card-bg: #ffffff; --border: #e0b88a; --dark: #4a3b2f;
             --accent: #ffd9b0; --hover: #ffc489; --text: #4a3b2f; --header-bg: #ffd9b0;
+            --modal-bg: #fefaf3; --input-bg: #fff; --progress-bg: #e0d6c2; --progress-fill: #ffd9b0;
         }
         body.theme-night {
             --bg: #1a1a2e; --card-bg: #16213e; --border: #533483; --dark: #e0d6ff;
             --accent: #3c2a6b; --hover: #5a3d8a; --text: #e0d6ff; --header-bg: #0f3460;
+            --modal-bg: #16213e; --input-bg: #1a1a2e; --progress-bg: #2a2a4a; --progress-fill: #533483;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -23,12 +24,12 @@
             background-attachment: fixed; background-position: center;
             position: relative; overflow-x: hidden;
         }
-        body.theme-night { background-image: url('night.jpg'); }
+        body.theme-night { background-image: url('night.jpg'); background-color: #1a1a2e; }
 
         /* Облака */
         .sky { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: hidden; }
         .cloud { position: absolute; image-rendering: pixelated; will-change: transform; }
-        body.theme-day .cloud { width: 160px; height: 60px; background: #fff; border: 3px solid #d0d0d0; box-shadow: -40px -20px 0 0 #fff, -20px -20px 0 0 #fff, 0px -20px 0 0 #fff, 20px -20px 0 0 #fff, 40px -20px 0 0 #fff, -50px -10px 0 0 #fff, 50px -10px 0 0 #fff, -40px 0px 0 0 #fff, -20px 0px 0 0 #fff, 20px 0px 0 0 #fff, 40px 0px 0 0 #fff; opacity: 0.9; }
+        body.theme-day .cloud { width: 160px; height: 60px; background: #ffffff; border: 3px solid #d0d0d0; box-shadow: -40px -20px 0 0 #fff, -20px -20px 0 0 #fff, 0px -20px 0 0 #fff, 20px -20px 0 0 #fff, 40px -20px 0 0 #fff, -50px -10px 0 0 #fff, 50px -10px 0 0 #fff, -40px 0px 0 0 #fff, -20px 0px 0 0 #fff, 20px 0px 0 0 #fff, 40px 0px 0 0 #fff; opacity: 0.9; }
         body.theme-night .cloud { width: 160px; height: 60px; background: #4a3578; border: 3px solid #6b4fa0; box-shadow: -40px -20px 0 0 #4a3578, -20px -20px 0 0 #4a3578, 0px -20px 0 0 #4a3578, 20px -20px 0 0 #4a3578, 40px -20px 0 0 #4a3578, -50px -10px 0 0 #4a3578, 50px -10px 0 0 #4a3578, -40px 0px 0 0 #4a3578, -20px 0px 0 0 #4a3578, 20px 0px 0 0 #4a3578, 40px 0px 0 0 #4a3578; opacity: 0.7; }
         .cloud1 { top: 3%; --scale: 0.7; animation: float1 30s linear infinite; left: -200px; }
         .cloud2 { top: 15%; --scale: 1.3; animation: float2 40s linear 6s infinite; left: -320px; }
@@ -47,7 +48,8 @@
         /* Шапка */
         header { background: var(--header-bg); padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid var(--border); position: relative; z-index: 100; transition: background 0.5s; }
         .logo-img { height: 50px; image-rendering: pixelated; }
-        .theme-btn { background: none; border: none; cursor: pointer; padding: 5px; }
+        .header-right { display: flex; align-items: center; gap: 8px; }
+        .theme-btn { background: none; border: none; cursor: pointer; padding: 0; }
         .theme-icon { width: 28px; height: 28px; image-rendering: pixelated; }
         .burger-btn { display: flex; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 8px; }
         .burger-btn span { display: block; width: 25px; height: 3px; background: var(--dark); border-radius: 1px; transition: 0.3s; }
@@ -56,27 +58,31 @@
         .burger-btn.active span:nth-child(3) { transform: rotate(-45deg) translate(6px,-6px); }
         .mobile-nav { display: flex; position: fixed; top: 0; right: -100%; width: 75%; max-width: 280px; height: 100vh; background: var(--accent); border-left: 4px solid var(--border); padding: 80px 15px 20px; flex-direction: column; gap: 12px; z-index: 200; transition: right 0.3s; }
         .mobile-nav.active { right: 0; }
-        .mobile-nav a { font-size: 10px; padding: 12px; border: 2px solid var(--border); background: var(--card-bg); text-decoration: none; color: var(--text); text-align: center; }
+        .mobile-nav a { font-size: 10px; padding: 12px; border: 2px solid var(--border); background: var(--card-bg); text-decoration: none; color: var(--text); text-align: center; display: block; }
 
         /* Карточки */
-        .card { background: var(--card-bg); border: 3px solid var(--border); box-shadow: 4px 4px 0 #d9a36a; padding: 20px; margin: 20px auto; max-width: 500px; text-align: center; font-size: 9px; line-height: 1.8; position: relative; z-index: 10; transition: background 0.5s, border-color 0.5s; }
+        .card { background: var(--card-bg); border: 3px solid var(--border); box-shadow: 4px 4px 0 #d9a36a; padding: 20px; margin: 20px auto; max-width: 500px; text-align: center; font-size: 9px; line-height: 1.8; position: relative; z-index: 10; transition: background 0.5s, border-color 0.5s, box-shadow 0.5s; }
         .word { font-size: 24px; margin: 10px 0; }
-        .option-btn { font-family: inherit; background: var(--accent); border: 2px solid var(--border); padding: 12px; cursor: pointer; font-size: 9px; text-decoration: none; color: var(--text); display: block; text-align: center; margin: 6px 0; }
-        .option-btn:hover { background: var(--hover); }
+        .option-btn, .grammar-topic-btn { font-family: inherit; background: var(--accent); border: 2px solid var(--border); padding: 12px; cursor: pointer; font-size: 9px; text-decoration: none; color: var(--text); display: block; text-align: center; margin: 6px 0; transition: background 0.2s; }
+        .option-btn:hover, .grammar-topic-btn:hover { background: var(--hover); }
         .option-btn.correct { background: #b2f0b2; }
         .option-btn.wrong { background: #f0b2b2; }
-        button { font-family: inherit; background: var(--accent); border: 2px solid var(--border); padding: 10px 14px; cursor: pointer; font-size: 9px; color: var(--text); }
+        button { font-family: inherit; background: var(--accent); border: 2px solid var(--border); padding: 10px 14px; cursor: pointer; font-size: 9px; color: var(--text); transition: background 0.2s; }
         button:hover { background: var(--hover); }
         .actions { display: flex; gap: 8px; margin-top: 15px; flex-wrap: wrap; justify-content: center; }
-        .progress-bar-container { width: 100%; height: 20px; background: #e0d6c2; border: 2px solid #b8a587; margin: 10px 0; }
-        .progress-bar { height: 100%; background: #ffd9b0; width: 0%; transition: width 0.3s; }
+        .progress-bar-container { width: 100%; height: 20px; background: var(--progress-bg); border: 2px solid #b8a587; margin: 10px 0; }
+        .progress-bar { height: 100%; background: var(--progress-fill); width: 0%; transition: width 0.3s; }
         footer { text-align: center; font-size: 7px; padding: 20px; position: relative; z-index: 10; color: var(--text); }
         .mickey-hint { font-size: 8px; margin-top: 10px; color: #b87450; }
         #wordList { list-style: none; padding: 0; text-align: left; }
         #wordList li { padding: 10px; border: 2px solid var(--border); margin-bottom: 6px; background: #fffdf7; font-size: 8px; word-break: break-word; }
         .task-input-area { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; justify-content: center; }
-        .pixel-input { font-family: inherit; font-size: 9px; padding: 10px; border: 3px solid var(--border); background: #fff; outline: none; width: 100%; max-width: 250px; }
+        .pixel-input { font-family: inherit; font-size: 9px; padding: 10px; border: 3px solid var(--border); background: var(--input-bg); color: var(--text); outline: none; width: 100%; max-width: 250px; }
         .task-nav { display: flex; justify-content: space-between; margin-top: 15px; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
+        .modal.show { display: flex; }
+        .modal-content { background: var(--modal-bg); border: 4px solid var(--border); padding: 25px; max-width: 600px; width: 100%; font-size: 9px; line-height: 1.6; position: relative; flex-direction: column; align-items: center; text-align: center; }
+        .close-btn { position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 22px; cursor: pointer; color: var(--text); }
     </style>
 </head>
 <body class="theme-day">
@@ -91,8 +97,14 @@
     <!-- Шапка -->
     <header>
         <img id="logoImg" src="logo.png" alt="Englify" class="logo-img">
-        <button class="theme-btn" onclick="toggleTheme()"><img id="themeIcon" src="daymod.png" class="theme-icon"></button>
-        <button class="burger-btn" id="burgerBtn" onclick="toggleMenu()"><span></span><span></span><span></span></button>
+        <div class="header-right">
+            <button class="theme-btn" onclick="toggleTheme()">
+                <img id="themeIcon" src="daymod.png" class="theme-icon" alt="Тема">
+            </button>
+            <button class="burger-btn" id="burgerBtn" onclick="toggleMenu()">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
         <div class="mobile-nav" id="mobileNav">
             <a href="#" onclick="showPage('word')">🏠 Слово дня</a>
             <a href="#" onclick="showPage('tasks')">📝 Задания</a>
@@ -109,7 +121,7 @@
     <footer>Микки всегда рядом 🐱<br><a href="https://t.me/engliFLY_bot" style="color:inherit;">Открыть бота</a></footer>
 
     <script>
-        // ===== ДАННЫЕ =====
+        // ===== ДАННЫЕ (захардкожены) =====
         const WORDS = ["abandon","ability","able","about","above","abroad","absence","absolute","absorb","abstract","abundant","academic","accelerate","accept","access","accident","accompany","accomplish","account","accurate","achieve","acknowledge","acquire","adapt","add","address","adequate","adjust","admire","admit","adopt","adult","advance","advantage","adventure","advertise","advice","affair","affect","afford","afraid","afternoon","again","age","agree","ahead","aim","air","airplane","alarm","album","alive","allow","almost","alone","along","already","also","although","among","amount","amuse","ancient","anger","angle","announce","annual","anxiety","apart","apologize","apparent","appear","appetite","apply","appreciate","approach","argument","arm","arrange","arrest","arrive","art","article","ashamed","aspect","assist","associate","assume","atmosphere","attach","attempt","attend","attention","attract","audience","author","autumn","available","average","avoid","awake","award","aware","awful","awkward","back","background","balance","ball","ban","bank","base","bath","battle","beach","bear","beat","beautiful","because","become","beef","beg","begin","behave","behind","believe","bell","belong","below","belt","bend","benefit","bet","beyond","bill","bin","bit","bitter","blame","blank","blind","block","blood","blow","board","boat","boil","bold","bomb","bone","book","border","borrow","boss","bother","bottle","bottom","bowl","box","boy","brain","branch","brand","brave","bread","break","breakfast","breath","brick","bridge","brief","bright","brilliant","bring","broad","broadcast","brother","brown","brush","budget","build","bullet","bunch","burn","burst","bury","bus","bush","business","butter","button","buy","cabin","cabinet","cable","cake","calculate","call","calm","camera","camp","cancel","candidate","cap","capable","capital","capture","car","card","care","career","carpet","carry","case","cash","cast","cat","catch","category","cause","celebrate","cell","center","century","certain","chain","chair","challenge","champion","chance","change","channel","chapter","character","charge","charity","chat","cheap","cheat","check","cheek","cheese","chef","chemical","chest","chicken","chief","child","chin","chocolate","choice","choose","church","cigarette","circle","citizen","city","claim","class","clean","clear","clever","click","climate","climb","clock","close","cloth","cloud","club","coach","coal","coast","coat","code","coffee","coin","cold","collar","collect","college","colour","column","combine","comfort","command","comment","commit","committee","common","communicate","community","company","compare","compete","complain","complete","complex","computer","concentrate","concept","concern","conclude","condition","conduct","conference","confidence","confirm","conflict","confuse","connect","conscious","consequence","consider","constant","construct","contact","contain","content","contest","continue","contract","contrast","contribute","control","convenient","conversation","convince","cook","cool","cooperate","copy","corner","correct","cost","cotton","cough","council","count","country","couple","courage","course","court","cover","crash","create","credit","crime","criminal","crisis","criticize","crop","cross","crowd","cry","culture","cup","cure","curious","current","curtain","curve","customer","cut","cycle","dad","daily","damage","dance","danger","dark","data","database","daughter","dawn","dead","deal","dear","debate","debt","decade","decide","decision","declare","decorate","deep","defend","define","degree","delay","deliver","demand","democracy","department","depend","describe","desert","deserve","design","desire","desk","destroy","detail","determine","develop","device","dialog","diary","dictate","die","differ","dig","digital","dinner","direct","disappear","discover","discuss","disease","display","distance","distribute","district","diverse","divide","divorce","document","dog","donate","door","double","doubt","down","download","draft","drag","drama","draw","dream","dress","drink","drive","drop","dry","duck","due","dull","dust","duty"];
         const IRREGULAR_VERBS = [
             {v1:"be",v2:"was/were",v3:"been",t:"быть"},{v1:"become",v2:"became",v3:"become",t:"становиться"},
@@ -148,8 +160,8 @@
         ];
 
         // ===== СОСТОЯНИЕ =====
-        let currentPage = 'word', lives = 3, streak = 0, level = 'novice', verbScore = 0, verbIdx = 0, verbs = [];
-        let grammarLevel = 'beginner', grammarTopicIdx = 0, grammarTaskIdx = 0;
+        let currentPage = 'word';
+        let lives = 3, streak = 0, level = 'novice';
         if (localStorage.getItem('engLives')) lives = parseInt(localStorage.getItem('engLives'));
         if (localStorage.getItem('engStreak')) streak = parseInt(localStorage.getItem('engStreak'));
         if (localStorage.getItem('engLevel')) level = localStorage.getItem('engLevel');
@@ -183,11 +195,14 @@
                 <div class="card">
                     <h2>🐱 Слово дня</h2>
                     <div class="word">${word}</div>
-                    <button onclick="speak('${word}')">🔊</button>
-                    <button onclick="learnWord('${word}')">✅ Выучил</button>
+                    <div class="actions">
+                        <button onclick="speak('${word}')">🔊 Озвучить</button>
+                        <button onclick="learnWord('${word}')">✅ Выучил</button>
+                    </div>
                     <div id="mickeyMsg" class="mickey-hint"></div>
                 </div>
-                <div class="card"><h3>Прогресс</h3>
+                <div class="card">
+                    <h3>Прогресс</h3>
                     <div class="progress-bar-container"><div class="progress-bar" id="progressBar"></div></div>
                     <p id="progressText"></p>
                 </div>`;
@@ -200,7 +215,10 @@
 
         function learnWord(word) {
             let learned = JSON.parse(localStorage.getItem('learnedWords')||'[]');
-            if (!learned.includes(word)) { learned.push(word); localStorage.setItem('learnedWords', JSON.stringify(learned)); }
+            if (!learned.includes(word)) {
+                learned.push(word);
+                localStorage.setItem('learnedWords', JSON.stringify(learned));
+            }
             document.getElementById('mickeyMsg').textContent = 'Мяу! Слово сохранено!';
             updateProgress();
         }
@@ -217,59 +235,88 @@
         // ===== ЗАДАНИЯ =====
         function renderTasksPage(main) {
             const questions = {
-                novice: [{q:"Как переводится «apple»?",o:["Яблоко","Апельсин","Банан"],c:0},{q:"She ___ a student.",o:["am","is","are"],c:1},{q:"Выбери перевод: «run»",o:["Бежать","Прыгать","Плавать"],c:0}],
-                middle: [{q:"Синоним «happy»:",o:["Glad","Sad","Angry"],c:0},{q:"He ___ finished his work.",o:["has","have","had"],c:0},{q:"If I ___ rich, I would travel.",o:["am","was","were"],c:2}],
-                pro: [{q:"Never ___ such a beautiful sunset.",o:["I have seen","have I seen","I saw"],c:1},{q:"Not only ___ the report, but she presented it.",o:["she finished","did she finish","she did finish"],c:1},{q:"Idiom: «break the ice» means:",o:["Разбить лёд","Начать разговор","Замёрзнуть"],c:1}]
+                novice: [
+                    {q:"Как переводится «apple»?",o:["Яблоко","Апельсин","Банан"],c:0},
+                    {q:"She ___ a student.",o:["am","is","are"],c:1},
+                    {q:"Выбери перевод: «run»",o:["Бежать","Прыгать","Плавать"],c:0}
+                ],
+                middle: [
+                    {q:"Синоним «happy»:",o:["Glad","Sad","Angry"],c:0},
+                    {q:"He ___ finished his work.",o:["has","have","had"],c:0},
+                    {q:"If I ___ rich, I would travel.",o:["am","was","were"],c:2}
+                ],
+                pro: [
+                    {q:"Never ___ such a beautiful sunset.",o:["I have seen","have I seen","I saw"],c:1},
+                    {q:"Not only ___ the report, but she presented it.",o:["she finished","did she finish","she did finish"],c:1},
+                    {q:"Idiom: «break the ice» means:",o:["Разбить лёд","Начать разговор","Замёрзнуть"],c:1}
+                ]
             };
             const tasks = questions[level];
             let idx = 0, correctCount = 0;
+
             function show() {
                 if (idx >= tasks.length) {
-                    main.innerHTML = `<div class="card"><h2>🎉 Готово!</h2><p>Правильно: ${correctCount}/${tasks.length}</p><p>❤️❤️❤️</p><button onclick="showPage('tasks')">Ещё раз</button></div>`;
+                    main.innerHTML = `<div class="card"><h2>🎉 Готово!</h2><p>Правильно: ${correctCount}/${tasks.length}</p><button onclick="showPage('tasks')">Ещё раз</button></div>`;
                     return;
                 }
                 const t = tasks[idx];
                 main.innerHTML = `<div class="card">
                     <h2>📝 Задания (${level})</h2>
                     <p>${t.q}</p>
-                    <div>${t.o.map((opt,i) => `<div class="option-btn" onclick="checkTaskAnswer(${i},${t.c},${idx})">${opt}</div>`).join('')}</div>
+                    ${t.o.map((opt,i) => `<div class="option-btn" onclick="checkTaskAnswer(${i},${t.c})">${opt}</div>`).join('')}
                     <div id="taskMsg" class="mickey-hint"></div>
                 </div>`;
-                window.checkTaskAnswer = (chosen, correct, taskIdx) => {
-                    const btns = document.querySelectorAll('.option-btn');
-                    btns.forEach((b,i) => { b.style.pointerEvents = 'none'; if (i===correct) b.classList.add('correct'); if (i===chosen&&chosen!==correct) b.classList.add('wrong'); });
-                    if (chosen === correct) { correctCount++; document.getElementById('taskMsg').textContent = '✅ Микки рад!'; }
-                    else { document.getElementById('taskMsg').textContent = '❌ Неверно'; }
-                    setTimeout(() => { idx++; show(); }, 1500);
-                };
             }
+
+            window.checkTaskAnswer = (chosen, correct) => {
+                const btns = document.querySelectorAll('.option-btn');
+                btns.forEach((b,i) => {
+                    b.style.pointerEvents = 'none';
+                    if (i === correct) b.classList.add('correct');
+                    if (i === chosen && chosen !== correct) b.classList.add('wrong');
+                });
+                if (chosen === correct) {
+                    correctCount++;
+                    document.getElementById('taskMsg').textContent = '✅ Микки рад!';
+                } else {
+                    document.getElementById('taskMsg').textContent = '❌ Неверно';
+                }
+                idx++;
+                setTimeout(show, 1500);
+            };
             show();
         }
 
         // ===== ГЛАГОЛЫ =====
         function renderVerbsPage(main) {
-            verbs = IRREGULAR_VERBS.sort(()=>Math.random()-0.5).slice(0,10);
-            verbIdx = 0; verbScore = 0;
+            const verbs = IRREGULAR_VERBS.sort(()=>Math.random()-0.5).slice(0,10);
+            let verbIdx = 0, verbScore = 0;
+
             function showVerb() {
                 if (verbIdx >= verbs.length) {
-                    main.innerHTML = `<div class="card"><h2>🎉 Готово!</h2><p>Правильно: ${verbScore}/${verbs.length}</p><button onclick="showPage('verbs')">Ещё раз</button></div>`;
+                    main.innerHTML = `<div class="card"><h2>🎉 Тренировка окончена!</h2><p>Правильно: ${verbScore}/${verbs.length}</p><button onclick="showPage('verbs')">Ещё раз</button></div>`;
                     return;
                 }
                 const v = verbs[verbIdx];
                 const correct = v.v3;
-                const others = IRREGULAR_VERBS.filter(x=>x.v3!==correct).sort(()=>Math.random()-0.5).slice(0,2).map(x=>x.v3);
+                const others = IRREGULAR_VERBS.filter(x => x.v3 !== correct).sort(()=>Math.random()-0.5).slice(0,2).map(x => x.v3);
                 const opts = [correct, ...others].sort(()=>Math.random()-0.5);
                 main.innerHTML = `<div class="card">
                     <h2>🐾 Глаголы</h2>
                     <p>Какая третья форма «${v.v1}» (${v.t})?</p>
                     <p>${v.v1} — ${v.v2} — ???</p>
-                    ${opts.map((o,i) => `<div class="option-btn" onclick="checkVerb('${o}','${correct}')">${o}</div>`).join('')}
+                    ${opts.map((o,i) => `<div class="option-btn" onclick="checkVerb('${o.replace(/'/g,"\\'")}','${correct.replace(/'/g,"\\'")}')">${o}</div>`).join('')}
                     <div id="verbMsg" class="mickey-hint"></div>
                 </div>`;
             }
+
             window.checkVerb = (chosen, correct) => {
-                if (chosen === correct) { verbScore++; document.getElementById('verbMsg').textContent = '✅ Верно!'; }
-                else { document.getElementById('verbMsg').textContent = '❌ Неверно. Правильно: ' + correct; }
+                if (chosen === correct) {
+                    verbScore++;
+                    document.getElementById('verbMsg').textContent = '✅ Верно!';
+                } else {
+                    document.getElementById('verbMsg').textContent = '❌ Неверно. Правильно: ' + correct;
+                }
                 verbIdx++;
                 setTimeout(showVerb, 1200);
             };
@@ -287,41 +334,58 @@
         }
 
         function showGrammarTopics(level) {
-            grammarLevel = level;
             const topics = {
-                beginner: [{id:1,title:"To be (am/is/are)"},{id:2,title:"Местоимения"},{id:3,title:"Множ. число"}],
-                intermediate: [{id:9,title:"Present Continuous"},{id:10,title:"Past Simple"},{id:11,title:"Future Simple"}],
-                advanced: [{id:17,title:"Past Perfect"},{id:18,title:"Conditionals 2/3"},{id:19,title:"Passive Voice"}]
+                beginner: [{id:1,title:"To be (am/is/are)"},{id:2,title:"Местоимения"},{id:3,title:"Множ. число"},{id:4,title:"Артикли a/an/the"},{id:5,title:"Have got / has got"},{id:6,title:"Present Simple"},{id:7,title:"There is / are"},{id:8,title:"Предлоги места и времени"}],
+                intermediate: [{id:9,title:"Present Continuous vs Simple"},{id:10,title:"Past Simple"},{id:11,title:"Future Simple / going to"},{id:12,title:"Present Perfect"},{id:13,title:"Модальные глаголы"},{id:14,title:"Степени сравнения"},{id:15,title:"Условные 0 и 1 типа"},{id:16,title:"Фразовые глаголы"}],
+                advanced: [{id:17,title:"Past Perfect / Future Perfect"},{id:18,title:"Условные 2 и 3 типа"},{id:19,title:"Пассивный залог"},{id:20,title:"Косвенная речь"},{id:21,title:"Инверсия"},{id:22,title:"Инфинитив / герундий"},{id:23,title:"Cleft sentences"},{id:24,title:"Идиомы и лексика"}]
             };
             const t = topics[level];
             document.getElementById('mainContent').innerHTML = `<div class="card">
                 <h2>${level}</h2>
                 ${t.map(topic => `<div class="option-btn" onclick="showGrammarTopic(${topic.id})">${topic.title}</div>`).join('')}
+                <button onclick="showPage('grammar')" style="margin-top:10px;">← Назад</button>
             </div>`;
+            window.grammarLevel = level;
         }
 
         function showGrammarTopic(id) {
             const questions = {
-                1: [{q:"I ___ a teacher.",a:"am"},{q:"She ___ from London.",a:"is"},{q:"They ___ happy.",a:"are"}],
-                2: [{q:"This is ___ book. (I)",a:"my"},{q:"___ name is Anna. (She)",a:"Her"},{q:"___ are my friends.",a:"These"}],
-                3: [{q:"one apple → two ___",a:"apples"},{q:"one box → three ___",a:"boxes"},{q:"one baby → four ___",a:"babies"}],
-                9: [{q:"Listen! She ___ (sing).",a:"is singing"},{q:"I usually ___ tea.",a:"drink"},{q:"Water ___ at 100°C.",a:"boils"}],
-                10: [{q:"I ___ (visit) my grandma yesterday.",a:"visited"},{q:"She ___ (go) to the cinema.",a:"went"},{q:"We ___ (not/see) that film.",a:"didn't see"}],
-                11: [{q:"I think it ___ (rain) tomorrow.",a:"will rain"},{q:"Look! It ___ (rain).",a:"is going to rain"},{q:"I ___ (help) you!",a:"will help"}],
-                17: [{q:"When we arrived, the film ___ (start).",a:"had already started"},{q:"By June, she ___ (finish).",a:"will have finished"},{q:"He ___ (never/see) snow.",a:"had never seen"}],
-                18: [{q:"If I ___ you, I would go.",a:"were"},{q:"If she had studied, she ___ (pass).",a:"would have passed"},{q:"I ___ that car if I had money.",a:"would buy"}],
-                19: [{q:"English ___ (speak) worldwide.",a:"is spoken"},{q:"The cake ___ (make) yesterday.",a:"was made"},{q:"The results ___ (announce) soon.",a:"will be announced"}]
+                1: [{q:"I ___ a teacher.",a:"am"},{q:"She ___ from London.",a:"is"},{q:"They ___ happy.",a:"are"},{q:"We ___ not tired.",a:"are"},{q:"___ you a student?",a:"Are"},{q:"My brother ___ 20 years old.",a:"is"},{q:"The cat ___ black.",a:"is"},{q:"I ___ not hungry.",a:"am"},{q:"___ he your friend?",a:"Is"},{q:"The books ___ on the table.",a:"are"}],
+                2: [{q:"This is ___ book. (I)",a:"my"},{q:"___ name is Anna. (She)",a:"Her"},{q:"___ are my friends.",a:"These"},{q:"Look at ___ dog over there.",a:"that"},{q:"___ house is very big. (They)",a:"Their"},{q:"Is this ___ pen? (you)",a:"your"},{q:"___ am from Russia.",a:"I"},{q:"We love ___ cat. (we)",a:"our"},{q:"___ apples are red.",a:"These"},{q:"He is my brother. ___ name is Tom.",a:"His"}],
+                3: [{q:"one apple → two ___",a:"apples"},{q:"one box → three ___",a:"boxes"},{q:"one baby → four ___",a:"babies"},{q:"one child → two ___",a:"children"},{q:"one knife → five ___",a:"knives"},{q:"one mouse → three ___",a:"mice"},{q:"one woman → two ___",a:"women"},{q:"one tomato → six ___",a:"tomatoes"},{q:"one leaf → many ___",a:"leaves"},{q:"one tooth → two ___",a:"teeth"}],
+                4: [{q:"I have ___ dog.",a:"a"},{q:"She is ___ honest person.",a:"an"},{q:"___ sun is shining.",a:"The"},{q:"Give me ___ orange, please.",a:"an"},{q:"He is ___ best student.",a:"the"},{q:"I saw ___ elephant at the zoo.",a:"an"},{q:"___ moon is beautiful tonight.",a:"The"},{q:"Can I have ___ glass of water?",a:"a"},{q:"This is ___ interesting idea.",a:"an"},{q:"___ children are playing outside.",a:"The"}],
+                5: [{q:"I ___ got a new bike.",a:"have"},{q:"She ___ got blue eyes.",a:"has"},{q:"___ they got a car?",a:"Have"},{q:"We ___ got any money.",a:"haven't"},{q:"He ___ got a sister.",a:"has"},{q:"___ your house got a garden?",a:"Has"},{q:"My parents ___ got a big flat.",a:"have"},{q:"I ___ got a headache.",a:"have"},{q:"She ___ got any pets.",a:"hasn't"},{q:"___ you got a pen?",a:"Have"}],
+                6: [{q:"He ___ (play) football every Sunday.",a:"plays"},{q:"They ___ (not/like) coffee.",a:"don't like"},{q:"___ she ___ (speak) English?",a:"Does / speak"},{q:"My sister ___ (study) at university.",a:"studies"},{q:"We ___ (go) to school by bus.",a:"go"},{q:"He ___ (not/watch) TV in the morning.",a:"doesn't watch"},{q:"___ you ___ (live) in Moscow?",a:"Do / live"},{q:"The train ___ (arrive) at 7 o'clock.",a:"arrives"},{q:"I ___ (have) breakfast at 8 a.m.",a:"have"},{q:"___ it ___ (rain) a lot here?",a:"Does / rain"}],
+                7: [{q:"___ a table in the room.",a:"There is"},{q:"___ two windows.",a:"There are"},{q:"___ any milk in the fridge?",a:"Is there"},{q:"___ many people in the park.",a:"There are"},{q:"___ a cat on the sofa.",a:"There isn't"},{q:"___ any books on the shelf?",a:"Are there"},{q:"___ an apple and two bananas.",a:"There is"},{q:"___ some sugar in the bowl.",a:"There is"},{q:"___ three children in the pool.",a:"There are"},{q:"___ any cheese?",a:"Is there"}],
+                8: [{q:"The cat is ___ the table.",a:"under"},{q:"The book is ___ the bag.",a:"in"},{q:"The picture is ___ the wall.",a:"on"},{q:"She sits ___ me. (рядом)",a:"next to"},{q:"I get up ___ 7 o'clock.",a:"at"},{q:"We go to the park ___ Sunday.",a:"on"},{q:"Her birthday is ___ May.",a:"in"},{q:"The bank is ___ the post office and the café.",a:"between"},{q:"Don't stand ___ front of the TV.",a:"in"},{q:"He is ___ home now.",a:"at"}],
+                9: [{q:"Listen! She ___ (sing).",a:"is singing"},{q:"I usually ___ (drink) tea.",a:"drink"},{q:"Water ___ (boil) at 100°C.",a:"boils"},{q:"They ___ (stay) at a hotel this week.",a:"are staying"},{q:"She ___ (study) French twice a week.",a:"studies"}],
+                10: [{q:"I ___ (visit) my grandma yesterday.",a:"visited"},{q:"She ___ (go) to the cinema.",a:"went"},{q:"We ___ (not/see) that film.",a:"didn't see"},{q:"___ he ___ (buy) a new car?",a:"Did / buy"},{q:"They ___ (eat) pizza for dinner.",a:"ate"}],
+                11: [{q:"I think it ___ (rain) tomorrow.",a:"will rain"},{q:"Look! It ___ (rain).",a:"is going to rain"},{q:"I ___ (help) you!",a:"will help"},{q:"They ___ (not/come) to the party.",a:"won't come"},{q:"What ___ you ___ (do) after the lesson?",a:"are / going to do"}],
+                12: [{q:"I ___ (finish) my homework.",a:"have finished"},{q:"She ___ (never/be) to China.",a:"has never been"},{q:"___ you ___ (ever/eat) sushi?",a:"Have / ever eaten"},{q:"We ___ (already/see) this movie.",a:"have already seen"},{q:"He ___ (live) here since 2010.",a:"has lived"}],
+                13: [{q:"You ___ see a doctor. You look sick.",a:"must"},{q:"I ___ swim very well.",a:"can"},{q:"You ___ eat more vegetables.",a:"should"},{q:"___ I open the window?",a:"May"},{q:"He ___ get up early.",a:"has to"}],
+                14: [{q:"My sister is ___ (tall) than me.",a:"taller"},{q:"This is ___ (good) restaurant.",a:"the best"},{q:"Today is ___ (hot) than yesterday.",a:"hotter"},{q:"She is ___ (intelligent) person.",a:"the most intelligent"},{q:"He runs ___ (fast) than his brother.",a:"faster"}],
+                15: [{q:"If you heat ice, it ___ (melt).",a:"melts"},{q:"If it ___ (rain), I will take an umbrella.",a:"rains"},{q:"She will miss the bus if she ___ (not/hurry).",a:"doesn't hurry"},{q:"We ___ (go) to the beach if the weather is nice.",a:"will go"},{q:"I'll call you if I ___ (have) time.",a:"have"}],
+                16: [{q:"Can you ___ (look after/look for) my cat?",a:"look after"},{q:"He ___ (gave up/gave away) smoking.",a:"gave up"},{q:"Please ___ (turn on/turn off) the light.",a:"turn off"},{q:"I'm really ___ (looking forward to/looking for) the holidays.",a:"looking forward to"},{q:"She ___ (put on/take off) her coat and went out.",a:"put on"}],
+                17: [{q:"When we arrived, the film ___ (already/start).",a:"had already started"},{q:"By June, she ___ (finish) the course.",a:"will have finished"},{q:"He ___ (never/see) snow before he moved.",a:"had never seen"}],
+                18: [{q:"If I ___ you, I would accept.",a:"were"},{q:"If she had studied, she ___ (pass).",a:"would have passed"},{q:"I ___ that car if I had money.",a:"would buy"}],
+                19: [{q:"English ___ (speak) worldwide.",a:"is spoken"},{q:"The cake ___ (make) yesterday.",a:"was made"},{q:"The results ___ (announce) next Monday.",a:"will be announced"}],
+                20: [{q:"She said she ___ tired.",a:"was"},{q:"They told me they ___ me.",a:"would call"},{q:"He said he ___ his work.",a:"had finished"}],
+                21: [{q:"Never ___ (I/see) such a beautiful sunset.",a:"have I seen"},{q:"Hardly ___ (we/arrive) when it started.",a:"had we arrived"},{q:"Not only ___ (she/finish) the report.",a:"did she finish"}],
+                22: [{q:"I heard her ___ (sing).",a:"sing"},{q:"He is said ___ (be) a millionaire.",a:"to be"},{q:"She suggested ___ (go) to the park.",a:"going"}],
+                23: [{q:"John broke the vase. → It ___ John who broke it.",a:"was"},{q:"I need a rest. → What I need ___ a rest.",a:"is"}],
+                24: [{q:"To start a conversation: ___ (break the ice/hit the sack)",a:"break the ice"},{q:"Very easy: piece of ___ (cake/cookie)",a:"cake"},{q:"She's practical: down-to-___ (earth/moon)",a:"earth"},{q:"I'm feeling sick: under the ___ (weather/cloud)",a:"weather"},{q:"He's generous: heart of ___ (gold/silver)",a:"gold"}]
             };
             const tasks = questions[id] || [];
-            grammarTaskIdx = 0;
-            function show() {
-                if (grammarTaskIdx >= tasks.length) {
-                    document.getElementById('mainContent').innerHTML = `<div class="card"><h2>🎉 Тема пройдена!</h2><button onclick="showGrammarTopics('${grammarLevel}')">К темам</button></div>`;
+            let taskIdx = 0;
+
+            function showTask() {
+                if (taskIdx >= tasks.length) {
+                    document.getElementById('mainContent').innerHTML = `<div class="card"><h2>🎉 Тема пройдена!</h2><button onclick="showGrammarTopics(window.grammarLevel)">К темам</button></div>`;
                     return;
                 }
-                const t = tasks[grammarTaskIdx];
+                const t = tasks[taskIdx];
                 document.getElementById('mainContent').innerHTML = `<div class="card">
-                    <h3>Задание ${grammarTaskIdx+1}/${tasks.length}</h3>
+                    <h3>Задание ${taskIdx+1}/${tasks.length}</h3>
                     <p>${t.q}</p>
                     <div class="task-input-area">
                         <input class="pixel-input" id="grammarInput" placeholder="Твой ответ">
@@ -330,15 +394,20 @@
                     <div id="grammarMsg" class="mickey-hint"></div>
                 </div>`;
             }
+
             window.checkGrammar = (correct) => {
                 const user = document.getElementById('grammarInput').value.trim().toLowerCase();
                 const msg = document.getElementById('grammarMsg');
-                if (user === correct.toLowerCase()) { msg.textContent = '✅ Верно! Микки рад!'; }
-                else { msg.textContent = `❌ Неверно. Правильно: ${correct}`; }
-                grammarTaskIdx++;
-                setTimeout(show, 1500);
+                if (user === correct.toLowerCase()) {
+                    msg.textContent = '✅ Верно! Микки рад!';
+                } else {
+                    msg.textContent = `❌ Неверно. Правильно: ${correct}`;
+                }
+                taskIdx++;
+                setTimeout(showTask, 1500);
             };
-            show();
+
+            showTask();
         }
 
         // ===== СЛОВАРЬ =====
@@ -353,7 +422,7 @@
         // ===== PRO =====
         function renderProPage(main) {
             main.innerHTML = `<div class="card">
-                <img src="pro.png" style="width:80px;image-rendering:pixelated;">
+                <img src="pro.png" style="width:80px; image-rendering:pixelated;" alt="Pro">
                 <h2>⭐ Pro</h2>
                 <p>Сними лимиты и получи перевод!</p>
                 <p>Пиши: <a href="https://t.me/finpolq" style="color:inherit;">@finpolq</a></p>
@@ -362,27 +431,33 @@
 
         // ===== ТЕМА =====
         function toggleTheme() {
-            const isNight = document.body.classList.contains('theme-night');
+            const body = document.body;
+            const isNight = body.classList.contains('theme-night');
             if (isNight) {
-                document.body.classList.remove('theme-night');
-                document.body.classList.add('theme-day');
+                body.classList.remove('theme-night');
+                body.classList.add('theme-day');
                 document.getElementById('themeIcon').src = 'daymod.png';
                 document.getElementById('logoImg').src = 'logo.png';
                 localStorage.setItem('engTheme', 'day');
             } else {
-                document.body.classList.remove('theme-day');
-                document.body.classList.add('theme-night');
+                body.classList.remove('theme-day');
+                body.classList.add('theme-night');
                 document.getElementById('themeIcon').src = 'nightmod.png';
                 document.getElementById('logoImg').src = 'nlogo.png';
                 localStorage.setItem('engTheme', 'night');
             }
         }
-        if (localStorage.getItem('engTheme') === 'night') {
-            document.body.classList.remove('theme-day');
-            document.body.classList.add('theme-night');
-            document.getElementById('themeIcon').src = 'nightmod.png';
-            document.getElementById('logoImg').src = 'nlogo.png';
-        }
+
+        // Загружаем сохранённую тему
+        (function() {
+            const savedTheme = localStorage.getItem('engTheme');
+            if (savedTheme === 'night') {
+                document.body.classList.remove('theme-day');
+                document.body.classList.add('theme-night');
+                document.getElementById('themeIcon').src = 'nightmod.png';
+                document.getElementById('logoImg').src = 'nlogo.png';
+            }
+        })();
 
         // ===== БУРГЕР =====
         function toggleMenu() {
