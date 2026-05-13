@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Englify – учи английский с Микки</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        /* ===== ВСЕ СТИЛИ (пиксельный Englify) ===== */
+        :root {
+            --bg: #fefaf3; --card-bg: #ffffff; --border: #e0b88a; --dark: #4a3b2f;
+            --accent: #ffd9b0; --hover: #ffc489; --text: #4a3b2f; --header-bg: #ffd9b0;
+        }
+        body.theme-night {
+            --bg: #1a1a2e; --card-bg: #16213e; --border: #533483; --dark: #e0d6ff;
+            --accent: #3c2a6b; --hover: #5a3d8a; --text: #e0d6ff; --header-bg: #0f3460;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Press Start 2P', cursive; background: var(--bg); color: var(--text);
+            min-height: 100vh; transition: background 0.5s, color 0.5s;
+            background-image: url('day.jpg'); background-size: cover;
+            background-attachment: fixed; background-position: center;
+            position: relative; overflow-x: hidden;
+        }
+        body.theme-night { background-image: url('night.jpg'); }
+
+        /* Облака */
+        .sky { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: hidden; }
+        .cloud { position: absolute; image-rendering: pixelated; will-change: transform; }
+        body.theme-day .cloud { width: 160px; height: 60px; background: #fff; border: 3px solid #d0d0d0; box-shadow: -40px -20px 0 0 #fff, -20px -20px 0 0 #fff, 0px -20px 0 0 #fff, 20px -20px 0 0 #fff, 40px -20px 0 0 #fff, -50px -10px 0 0 #fff, 50px -10px 0 0 #fff, -40px 0px 0 0 #fff, -20px 0px 0 0 #fff, 20px 0px 0 0 #fff, 40px 0px 0 0 #fff; opacity: 0.9; }
+        body.theme-night .cloud { width: 160px; height: 60px; background: #4a3578; border: 3px solid #6b4fa0; box-shadow: -40px -20px 0 0 #4a3578, -20px -20px 0 0 #4a3578, 0px -20px 0 0 #4a3578, 20px -20px 0 0 #4a3578, 40px -20px 0 0 #4a3578, -50px -10px 0 0 #4a3578, 50px -10px 0 0 #4a3578, -40px 0px 0 0 #4a3578, -20px 0px 0 0 #4a3578, 20px 0px 0 0 #4a3578, 40px 0px 0 0 #4a3578; opacity: 0.7; }
+        .cloud1 { top: 3%; --scale: 0.7; animation: float1 30s linear infinite; left: -200px; }
+        .cloud2 { top: 15%; --scale: 1.3; animation: float2 40s linear 6s infinite; left: -320px; }
+        .cloud3 { top: 28%; --scale: 0.55; animation: float3 35s linear 12s infinite; left: -260px; }
+        .cloud4 { top: 42%; --scale: 1.1; animation: float4 45s linear 18s infinite; left: -380px; }
+        .cloud5 { top: 55%; --scale: 0.85; animation: float5 50s linear 24s infinite; left: -300px; }
+        .cloud6 { top: 68%; --scale: 1.05; animation: float1 38s linear 10s infinite; left: -350px; }
+        .cloud7 { top: 78%; --scale: 0.75; animation: float2 42s linear 16s infinite; left: -280px; }
+        .cloud8 { top: 88%; --scale: 0.95; animation: float3 47s linear 22s infinite; left: -400px; }
+        @keyframes float1 { 0% { transform: translateX(0) scale(var(--scale)); } 100% { transform: translateX(calc(100vw + 600px)) scale(var(--scale)); } }
+        @keyframes float2 { 0% { transform: translateX(0) scale(var(--scale)); } 100% { transform: translateX(calc(100vw + 600px)) scale(var(--scale)); } }
+        @keyframes float3 { 0% { transform: translateX(0) scale(var(--scale)); } 100% { transform: translateX(calc(100vw + 600px)) scale(var(--scale)); } }
+        @keyframes float4 { 0% { transform: translateX(0) scale(var(--scale)); } 100% { transform: translateX(calc(100vw + 600px)) scale(var(--scale)); } }
+        @keyframes float5 { 0% { transform: translateX(0) scale(var(--scale)); } 100% { transform: translateX(calc(100vw + 600px)) scale(var(--scale)); } }
+
+        /* Шапка */
+        header { background: var(--header-bg); padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid var(--border); position: relative; z-index: 100; transition: background 0.5s; }
+        .logo-img { height: 50px; image-rendering: pixelated; }
+        .theme-btn { background: none; border: none; cursor: pointer; padding: 5px; }
+        .theme-icon { width: 28px; height: 28px; image-rendering: pixelated; }
+        .burger-btn { display: flex; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 8px; }
+        .burger-btn span { display: block; width: 25px; height: 3px; background: var(--dark); border-radius: 1px; transition: 0.3s; }
+        .burger-btn.active span:nth-child(1) { transform: rotate(45deg) translate(6px,6px); }
+        .burger-btn.active span:nth-child(2) { opacity: 0; }
+        .burger-btn.active span:nth-child(3) { transform: rotate(-45deg) translate(6px,-6px); }
+        .mobile-nav { display: flex; position: fixed; top: 0; right: -100%; width: 75%; max-width: 280px; height: 100vh; background: var(--accent); border-left: 4px solid var(--border); padding: 80px 15px 20px; flex-direction: column; gap: 12px; z-index: 200; transition: right 0.3s; }
+        .mobile-nav.active { right: 0; }
+        .mobile-nav a { font-size: 10px; padding: 12px; border: 2px solid var(--border); background: var(--card-bg); text-decoration: none; color: var(--text); text-align: center; }
+
+        /* Карточки */
+        .card { background: var(--card-bg); border: 3px solid var(--border); box-shadow: 4px 4px 0 #d9a36a; padding: 20px; margin: 20px auto; max-width: 500px; text-align: center; font-size: 9px; line-height: 1.8; position: relative; z-index: 10; transition: background 0.5s, border-color 0.5s; }
+        .word { font-size: 24px; margin: 10px 0; }
+        .option-btn { font-family: inherit; background: var(--accent); border: 2px solid var(--border); padding: 12px; cursor: pointer; font-size: 9px; text-decoration: none; color: var(--text); display: block; text-align: center; margin: 6px 0; }
+        .option-btn:hover { background: var(--hover); }
+        .option-btn.correct { background: #b2f0b2; }
+        .option-btn.wrong { background: #f0b2b2; }
+        button { font-family: inherit; background: var(--accent); border: 2px solid var(--border); padding: 10px 14px; cursor: pointer; font-size: 9px; color: var(--text); }
+        button:hover { background: var(--hover); }
+        .actions { display: flex; gap: 8px; margin-top: 15px; flex-wrap: wrap; justify-content: center; }
+        .progress-bar-container { width: 100%; height: 20px; background: #e0d6c2; border: 2px solid #b8a587; margin: 10px 0; }
+        .progress-bar { height: 100%; background: #ffd9b0; width: 0%; transition: width 0.3s; }
+        footer { text-align: center; font-size: 7px; padding: 20px; position: relative; z-index: 10; color: var(--text); }
+        .mickey-hint { font-size: 8px; margin-top: 10px; color: #b87450; }
+        #wordList { list-style: none; padding: 0; text-align: left; }
+        #wordList li { padding: 10px; border: 2px solid var(--border); margin-bottom: 6px; background: #fffdf7; font-size: 8px; word-break: break-word; }
+        .task-input-area { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; justify-content: center; }
+        .pixel-input { font-family: inherit; font-size: 9px; padding: 10px; border: 3px solid var(--border); background: #fff; outline: none; width: 100%; max-width: 250px; }
+        .task-nav { display: flex; justify-content: space-between; margin-top: 15px; }
+    </style>
+</head>
+<body class="theme-day">
+
+    <!-- Облака -->
+    <div class="sky">
+        <div class="cloud cloud1"></div><div class="cloud cloud2"></div><div class="cloud cloud3"></div>
+        <div class="cloud cloud4"></div><div class="cloud cloud5"></div><div class="cloud cloud6"></div>
+        <div class="cloud cloud7"></div><div class="cloud cloud8"></div>
+    </div>
+
+    <!-- Шапка -->
+    <header>
+        <img id="logoImg" src="logo.PNG" alt="Englify" class="logo-img">
+        <button class="theme-btn" onclick="toggleTheme()"><img id="themeIcon" src="daymod.png" class="theme-icon"></button>
+        <button class="burger-btn" id="burgerBtn" onclick="toggleMenu()"><span></span><span></span><span></span></button>
+        <div class="mobile-nav" id="mobileNav">
+            <a href="#" onclick="showPage('word')">🏠 Слово дня</a>
+            <a href="#" onclick="showPage('tasks')">📝 Задания</a>
+            <a href="#" onclick="showPage('verbs')">🐾 Глаголы</a>
+            <a href="#" onclick="showPage('grammar')">📘 Грамматика</a>
+            <a href="#" onclick="showPage('words')">📚 Словарь</a>
+            <a href="#" onclick="showPage('pro')">⭐ Pro</a>
+        </div>
+    </header>
+
+    <!-- Контент -->
+    <main id="mainContent"></main>
+
+    <footer>Микки всегда рядом 🐱<br><a href="https://t.me/engliFLY_bot" style="color:inherit;">Открыть бота</a></footer>
+
+    <script>
+        // ===== ДАННЫЕ =====
+        const WORDS = ["abandon","ability","able","about","above","abroad","absence","absolute","absorb","abstract","abundant","academic","accelerate","accept","access","accident","accompany","accomplish","account","accurate","achieve","acknowledge","acquire","adapt","add","address","adequate","adjust","admire","admit","adopt","adult","advance","advantage","adventure","advertise","advice","affair","affect","afford","afraid","afternoon","again","age","agree","ahead","aim","air","airplane","alarm","album","alive","allow","almost","alone","along","already","also","although","among","amount","amuse","ancient","anger","angle","announce","annual","anxiety","apart","apologize","apparent","appear","appetite","apply","appreciate","approach","argument","arm","arrange","arrest","arrive","art","article","ashamed","aspect","assist","associate","assume","atmosphere","attach","attempt","attend","attention","attract","audience","author","autumn","available","average","avoid","awake","award","aware","awful","awkward","back","background","balance","ball","ban","bank","base","bath","battle","beach","bear","beat","beautiful","because","become","beef","beg","begin","behave","behind","believe","bell","belong","below","belt","bend","benefit","bet","beyond","bill","bin","bit","bitter","blame","blank","blind","block","blood","blow","board","boat","boil","bold","bomb","bone","book","border","borrow","boss","bother","bottle","bottom","bowl","box","boy","brain","branch","brand","brave","bread","break","breakfast","breath","brick","bridge","brief","bright","brilliant","bring","broad","broadcast","brother","brown","brush","budget","build","bullet","bunch","burn","burst","bury","bus","bush","business","butter","button","buy","cabin","cabinet","cable","cake","calculate","call","calm","camera","camp","cancel","candidate","cap","capable","capital","capture","car","card","care","career","carpet","carry","case","cash","cast","cat","catch","category","cause","celebrate","cell","center","century","certain","chain","chair","challenge","champion","chance","change","channel","chapter","character","charge","charity","chat","cheap","cheat","check","cheek","cheese","chef","chemical","chest","chicken","chief","child","chin","chocolate","choice","choose","church","cigarette","circle","citizen","city","claim","class","clean","clear","clever","click","climate","climb","clock","close","cloth","cloud","club","coach","coal","coast","coat","code","coffee","coin","cold","collar","collect","college","colour","column","combine","comfort","command","comment","commit","committee","common","communicate","community","company","compare","compete","complain","complete","complex","computer","concentrate","concept","concern","conclude","condition","conduct","conference","confidence","confirm","conflict","confuse","connect","conscious","consequence","consider","constant","construct","contact","contain","content","contest","continue","contract","contrast","contribute","control","convenient","conversation","convince","cook","cool","cooperate","copy","corner","correct","cost","cotton","cough","council","count","country","couple","courage","course","court","cover","crash","create","credit","crime","criminal","crisis","criticize","crop","cross","crowd","cry","culture","cup","cure","curious","current","curtain","curve","customer","cut","cycle","dad","daily","damage","dance","danger","dark","data","database","daughter","dawn","dead","deal","dear","debate","debt","decade","decide","decision","declare","decorate","deep","defend","define","degree","delay","deliver","demand","democracy","department","depend","describe","desert","deserve","design","desire","desk","destroy","detail","determine","develop","device","dialog","diary","dictate","die","differ","dig","digital","dinner","direct","disappear","discover","discuss","disease","display","distance","distribute","district","diverse","divide","divorce","document","dog","donate","door","double","doubt","down","download","draft","drag","drama","draw","dream","dress","drink","drive","drop","dry","duck","due","dull","dust","duty"];
+        const IRREGULAR_VERBS = [
+            {v1:"be",v2:"was/were",v3:"been",t:"быть"},{v1:"become",v2:"became",v3:"become",t:"становиться"},
+            {v1:"begin",v2:"began",v3:"begun",t:"начинать"},{v1:"break",v2:"broke",v3:"broken",t:"ломать"},
+            {v1:"bring",v2:"brought",v3:"brought",t:"приносить"},{v1:"build",v2:"built",v3:"built",t:"строить"},
+            {v1:"buy",v2:"bought",v3:"bought",t:"покупать"},{v1:"catch",v2:"caught",v3:"caught",t:"ловить"},
+            {v1:"choose",v2:"chose",v3:"chosen",t:"выбирать"},{v1:"come",v2:"came",v3:"come",t:"приходить"},
+            {v1:"do",v2:"did",v3:"done",t:"делать"},{v1:"draw",v2:"drew",v3:"drawn",t:"рисовать"},
+            {v1:"drink",v2:"drank",v3:"drunk",t:"пить"},{v1:"drive",v2:"drove",v3:"driven",t:"водить"},
+            {v1:"eat",v2:"ate",v3:"eaten",t:"есть"},{v1:"fall",v2:"fell",v3:"fallen",t:"падать"},
+            {v1:"feel",v2:"felt",v3:"felt",t:"чувствовать"},{v1:"find",v2:"found",v3:"found",t:"находить"},
+            {v1:"fly",v2:"flew",v3:"flown",t:"летать"},{v1:"forget",v2:"forgot",v3:"forgotten",t:"забывать"},
+            {v1:"get",v2:"got",v3:"got/gotten",t:"получать"},{v1:"give",v2:"gave",v3:"given",t:"давать"},
+            {v1:"go",v2:"went",v3:"gone",t:"идти"},{v1:"grow",v2:"grew",v3:"grown",t:"расти"},
+            {v1:"have",v2:"had",v3:"had",t:"иметь"},{v1:"hear",v2:"heard",v3:"heard",t:"слышать"},
+            {v1:"hide",v2:"hid",v3:"hidden",t:"прятать"},{v1:"hit",v2:"hit",v3:"hit",t:"ударять"},
+            {v1:"hold",v2:"held",v3:"held",t:"держать"},{v1:"keep",v2:"kept",v3:"kept",t:"хранить"},
+            {v1:"know",v2:"knew",v3:"known",t:"знать"},{v1:"lead",v2:"led",v3:"led",t:"вести"},
+            {v1:"leave",v2:"left",v3:"left",t:"покидать"},{v1:"lend",v2:"lent",v3:"lent",t:"одалживать"},
+            {v1:"let",v2:"let",v3:"let",t:"позволять"},{v1:"lose",v2:"lost",v3:"lost",t:"терять"},
+            {v1:"make",v2:"made",v3:"made",t:"делать"},{v1:"mean",v2:"meant",v3:"meant",t:"значить"},
+            {v1:"meet",v2:"met",v3:"met",t:"встречать"},{v1:"pay",v2:"paid",v3:"paid",t:"платить"},
+            {v1:"put",v2:"put",v3:"put",t:"класть"},{v1:"read",v2:"read",v3:"read",t:"читать"},
+            {v1:"ride",v2:"rode",v3:"ridden",t:"ехать"},{v1:"ring",v2:"rang",v3:"rung",t:"звонить"},
+            {v1:"run",v2:"ran",v3:"run",t:"бежать"},{v1:"say",v2:"said",v3:"said",t:"сказать"},
+            {v1:"see",v2:"saw",v3:"seen",t:"видеть"},{v1:"sell",v2:"sold",v3:"sold",t:"продавать"},
+            {v1:"send",v2:"sent",v3:"sent",t:"посылать"},{v1:"sing",v2:"sang",v3:"sung",t:"петь"},
+            {v1:"sit",v2:"sat",v3:"sat",t:"сидеть"},{v1:"sleep",v2:"slept",v3:"slept",t:"спать"},
+            {v1:"speak",v2:"spoke",v3:"spoken",t:"говорить"},{v1:"spend",v2:"spent",v3:"spent",t:"тратить"},
+            {v1:"stand",v2:"stood",v3:"stood",t:"стоять"},{v1:"swim",v2:"swam",v3:"swum",t:"плавать"},
+            {v1:"take",v2:"took",v3:"taken",t:"брать"},{v1:"teach",v2:"taught",v3:"taught",t:"учить"},
+            {v1:"tell",v2:"told",v3:"told",t:"рассказывать"},{v1:"think",v2:"thought",v3:"thought",t:"думать"},
+            {v1:"throw",v2:"threw",v3:"thrown",t:"бросать"},{v1:"understand",v2:"understood",v3:"understood",t:"понимать"},
+            {v1:"wake",v2:"woke",v3:"woken",t:"будить"},{v1:"wear",v2:"wore",v3:"worn",t:"носить"},
+            {v1:"win",v2:"won",v3:"won",t:"побеждать"},{v1:"write",v2:"wrote",v3:"written",t:"писать"}
+        ];
+
+        // ===== СОСТОЯНИЕ =====
+        let currentPage = 'word', lives = 3, streak = 0, level = 'novice', verbScore = 0, verbIdx = 0, verbs = [];
+        let grammarLevel = 'beginner', grammarTopicIdx = 0, grammarTaskIdx = 0;
+        if (localStorage.getItem('engLives')) lives = parseInt(localStorage.getItem('engLives'));
+        if (localStorage.getItem('engStreak')) streak = parseInt(localStorage.getItem('engStreak'));
+        if (localStorage.getItem('engLevel')) level = localStorage.getItem('engLevel');
+
+        // ===== НАВИГАЦИЯ =====
+        function showPage(page) {
+            currentPage = page;
+            document.getElementById('mobileNav').classList.remove('active');
+            document.getElementById('burgerBtn').classList.remove('active');
+            renderPage();
+        }
+
+        function renderPage() {
+            const main = document.getElementById('mainContent');
+            switch(currentPage) {
+                case 'word': renderWordPage(main); break;
+                case 'tasks': renderTasksPage(main); break;
+                case 'verbs': renderVerbsPage(main); break;
+                case 'grammar': renderGrammarLevels(main); break;
+                case 'words': renderWordsPage(main); break;
+                case 'pro': renderProPage(main); break;
+                default: renderWordPage(main);
+            }
+        }
+
+        // ===== СЛОВО ДНЯ =====
+        function renderWordPage(main) {
+            const day = new Date().getDate() % 365;
+            const word = WORDS[day];
+            main.innerHTML = `
+                <div class="card">
+                    <h2>🐱 Слово дня</h2>
+                    <div class="word">${word}</div>
+                    <button onclick="speak('${word}')">🔊</button>
+                    <button onclick="learnWord('${word}')">✅ Выучил</button>
+                    <div id="mickeyMsg" class="mickey-hint"></div>
+                </div>
+                <div class="card"><h3>Прогресс</h3>
+                    <div class="progress-bar-container"><div class="progress-bar" id="progressBar"></div></div>
+                    <p id="progressText"></p>
+                </div>`;
+            updateProgress();
+        }
+
+        function speak(text) {
+            const u = new SpeechSynthesisUtterance(text); u.lang = 'en-US'; speechSynthesis.speak(u);
+        }
+
+        function learnWord(word) {
+            let learned = JSON.parse(localStorage.getItem('learnedWords')||'[]');
+            if (!learned.includes(word)) { learned.push(word); localStorage.setItem('learnedWords', JSON.stringify(learned)); }
+            document.getElementById('mickeyMsg').textContent = 'Мяу! Слово сохранено!';
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const learned = JSON.parse(localStorage.getItem('learnedWords')||'[]');
+            const pct = Math.round((learned.length/365)*100);
+            const bar = document.getElementById('progressBar');
+            const txt = document.getElementById('progressText');
+            if (bar) bar.style.width = pct + '%';
+            if (txt) txt.textContent = learned.length + ' / 365 слов';
+        }
+
+        // ===== ЗАДАНИЯ =====
+        function renderTasksPage(main) {
+            const questions = {
+                novice: [{q:"Как переводится «apple»?",o:["Яблоко","Апельсин","Банан"],c:0},{q:"She ___ a student.",o:["am","is","are"],c:1},{q:"Выбери перевод: «run»",o:["Бежать","Прыгать","Плавать"],c:0}],
+                middle: [{q:"Синоним «happy»:",o:["Glad","Sad","Angry"],c:0},{q:"He ___ finished his work.",o:["has","have","had"],c:0},{q:"If I ___ rich, I would travel.",o:["am","was","were"],c:2}],
+                pro: [{q:"Never ___ such a beautiful sunset.",o:["I have seen","have I seen","I saw"],c:1},{q:"Not only ___ the report, but she presented it.",o:["she finished","did she finish","she did finish"],c:1},{q:"Idiom: «break the ice» means:",o:["Разбить лёд","Начать разговор","Замёрзнуть"],c:1}]
+            };
+            const tasks = questions[level];
+            let idx = 0, correctCount = 0;
+            function show() {
+                if (idx >= tasks.length) {
+                    main.innerHTML = `<div class="card"><h2>🎉 Готово!</h2><p>Правильно: ${correctCount}/${tasks.length}</p><p>❤️❤️❤️</p><button onclick="showPage('tasks')">Ещё раз</button></div>`;
+                    return;
+                }
+                const t = tasks[idx];
+                main.innerHTML = `<div class="card">
+                    <h2>📝 Задания (${level})</h2>
+                    <p>${t.q}</p>
+                    <div>${t.o.map((opt,i) => `<div class="option-btn" onclick="checkTaskAnswer(${i},${t.c},${idx})">${opt}</div>`).join('')}</div>
+                    <div id="taskMsg" class="mickey-hint"></div>
+                </div>`;
+                window.checkTaskAnswer = (chosen, correct, taskIdx) => {
+                    const btns = document.querySelectorAll('.option-btn');
+                    btns.forEach((b,i) => { b.style.pointerEvents = 'none'; if (i===correct) b.classList.add('correct'); if (i===chosen&&chosen!==correct) b.classList.add('wrong'); });
+                    if (chosen === correct) { correctCount++; document.getElementById('taskMsg').textContent = '✅ Микки рад!'; }
+                    else { document.getElementById('taskMsg').textContent = '❌ Неверно'; }
+                    setTimeout(() => { idx++; show(); }, 1500);
+                };
+            }
+            show();
+        }
+
+        // ===== ГЛАГОЛЫ =====
+        function renderVerbsPage(main) {
+            verbs = IRREGULAR_VERBS.sort(()=>Math.random()-0.5).slice(0,10);
+            verbIdx = 0; verbScore = 0;
+            function showVerb() {
+                if (verbIdx >= verbs.length) {
+                    main.innerHTML = `<div class="card"><h2>🎉 Готово!</h2><p>Правильно: ${verbScore}/${verbs.length}</p><button onclick="showPage('verbs')">Ещё раз</button></div>`;
+                    return;
+                }
+                const v = verbs[verbIdx];
+                const correct = v.v3;
+                const others = IRREGULAR_VERBS.filter(x=>x.v3!==correct).sort(()=>Math.random()-0.5).slice(0,2).map(x=>x.v3);
+                const opts = [correct, ...others].sort(()=>Math.random()-0.5);
+                main.innerHTML = `<div class="card">
+                    <h2>🐾 Глаголы</h2>
+                    <p>Какая третья форма «${v.v1}» (${v.t})?</p>
+                    <p>${v.v1} — ${v.v2} — ???</p>
+                    ${opts.map((o,i) => `<div class="option-btn" onclick="checkVerb('${o}','${correct}')">${o}</div>`).join('')}
+                    <div id="verbMsg" class="mickey-hint"></div>
+                </div>`;
+            }
+            window.checkVerb = (chosen, correct) => {
+                if (chosen === correct) { verbScore++; document.getElementById('verbMsg').textContent = '✅ Верно!'; }
+                else { document.getElementById('verbMsg').textContent = '❌ Неверно. Правильно: ' + correct; }
+                verbIdx++;
+                setTimeout(showVerb, 1200);
+            };
+            showVerb();
+        }
+
+        // ===== ГРАММАТИКА =====
+        function renderGrammarLevels(main) {
+            main.innerHTML = `<div class="card">
+                <h2>📘 Грамматика</h2>
+                <div class="option-btn" onclick="showGrammarTopics('beginner')">🟢 Beginner</div>
+                <div class="option-btn" onclick="showGrammarTopics('intermediate')">🟡 Intermediate</div>
+                <div class="option-btn" onclick="showGrammarTopics('advanced')">🔴 Advanced</div>
+            </div>`;
+        }
+
+        function showGrammarTopics(level) {
+            grammarLevel = level;
+            const topics = {
+                beginner: [{id:1,title:"To be (am/is/are)"},{id:2,title:"Местоимения"},{id:3,title:"Множ. число"}],
+                intermediate: [{id:9,title:"Present Continuous"},{id:10,title:"Past Simple"},{id:11,title:"Future Simple"}],
+                advanced: [{id:17,title:"Past Perfect"},{id:18,title:"Conditionals 2/3"},{id:19,title:"Passive Voice"}]
+            };
+            const t = topics[level];
+            document.getElementById('mainContent').innerHTML = `<div class="card">
+                <h2>${level}</h2>
+                ${t.map(topic => `<div class="option-btn" onclick="showGrammarTopic(${topic.id})">${topic.title}</div>`).join('')}
+            </div>`;
+        }
+
+        function showGrammarTopic(id) {
+            const questions = {
+                1: [{q:"I ___ a teacher.",a:"am"},{q:"She ___ from London.",a:"is"},{q:"They ___ happy.",a:"are"}],
+                2: [{q:"This is ___ book. (I)",a:"my"},{q:"___ name is Anna. (She)",a:"Her"},{q:"___ are my friends.",a:"These"}],
+                3: [{q:"one apple → two ___",a:"apples"},{q:"one box → three ___",a:"boxes"},{q:"one baby → four ___",a:"babies"}],
+                9: [{q:"Listen! She ___ (sing).",a:"is singing"},{q:"I usually ___ tea.",a:"drink"},{q:"Water ___ at 100°C.",a:"boils"}],
+                10: [{q:"I ___ (visit) my grandma yesterday.",a:"visited"},{q:"She ___ (go) to the cinema.",a:"went"},{q:"We ___ (not/see) that film.",a:"didn't see"}],
+                11: [{q:"I think it ___ (rain) tomorrow.",a:"will rain"},{q:"Look! It ___ (rain).",a:"is going to rain"},{q:"I ___ (help) you!",a:"will help"}],
+                17: [{q:"When we arrived, the film ___ (start).",a:"had already started"},{q:"By June, she ___ (finish).",a:"will have finished"},{q:"He ___ (never/see) snow.",a:"had never seen"}],
+                18: [{q:"If I ___ you, I would go.",a:"were"},{q:"If she had studied, she ___ (pass).",a:"would have passed"},{q:"I ___ that car if I had money.",a:"would buy"}],
+                19: [{q:"English ___ (speak) worldwide.",a:"is spoken"},{q:"The cake ___ (make) yesterday.",a:"was made"},{q:"The results ___ (announce) soon.",a:"will be announced"}]
+            };
+            const tasks = questions[id] || [];
+            grammarTaskIdx = 0;
+            function show() {
+                if (grammarTaskIdx >= tasks.length) {
+                    document.getElementById('mainContent').innerHTML = `<div class="card"><h2>🎉 Тема пройдена!</h2><button onclick="showGrammarTopics('${grammarLevel}')">К темам</button></div>`;
+                    return;
+                }
+                const t = tasks[grammarTaskIdx];
+                document.getElementById('mainContent').innerHTML = `<div class="card">
+                    <h3>Задание ${grammarTaskIdx+1}/${tasks.length}</h3>
+                    <p>${t.q}</p>
+                    <div class="task-input-area">
+                        <input class="pixel-input" id="grammarInput" placeholder="Твой ответ">
+                        <button onclick="checkGrammar('${t.a.replace(/'/g,"\\'")}')">Проверить</button>
+                    </div>
+                    <div id="grammarMsg" class="mickey-hint"></div>
+                </div>`;
+            }
+            window.checkGrammar = (correct) => {
+                const user = document.getElementById('grammarInput').value.trim().toLowerCase();
+                const msg = document.getElementById('grammarMsg');
+                if (user === correct.toLowerCase()) { msg.textContent = '✅ Верно! Микки рад!'; }
+                else { msg.textContent = `❌ Неверно. Правильно: ${correct}`; }
+                grammarTaskIdx++;
+                setTimeout(show, 1500);
+            };
+            show();
+        }
+
+        // ===== СЛОВАРЬ =====
+        function renderWordsPage(main) {
+            const learned = JSON.parse(localStorage.getItem('learnedWords')||'[]');
+            main.innerHTML = `<div class="card">
+                <h2>📚 Словарь</h2>
+                <ul id="wordList">${learned.length === 0 ? '<li>Пока нет слов</li>' : learned.map(w => `<li>${w}</li>`).join('')}</ul>
+            </div>`;
+        }
+
+        // ===== PRO =====
+        function renderProPage(main) {
+            main.innerHTML = `<div class="card">
+                <img src="pro.png" style="width:80px;image-rendering:pixelated;">
+                <h2>⭐ Pro</h2>
+                <p>Сними лимиты и получи перевод!</p>
+                <p>Пиши: <a href="https://t.me/finpolq" style="color:inherit;">@finpolq</a></p>
+            </div>`;
+        }
+
+        // ===== ТЕМА =====
+        function toggleTheme() {
+            const isNight = document.body.classList.contains('theme-night');
+            if (isNight) {
+                document.body.classList.remove('theme-night');
+                document.body.classList.add('theme-day');
+                document.getElementById('themeIcon').src = 'daymod.png';
+                document.getElementById('logoImg').src = 'logo.PNG';
+                localStorage.setItem('engTheme', 'day');
+            } else {
+                document.body.classList.remove('theme-day');
+                document.body.classList.add('theme-night');
+                document.getElementById('themeIcon').src = 'nightmod.png';
+                document.getElementById('logoImg').src = 'nlogo.png';
+                localStorage.setItem('engTheme', 'night');
+            }
+        }
+        if (localStorage.getItem('engTheme') === 'night') {
+            document.body.classList.remove('theme-day');
+            document.body.classList.add('theme-night');
+            document.getElementById('themeIcon').src = 'nightmod.png';
+            document.getElementById('logoImg').src = 'nlogo.png';
+        }
+
+        // ===== БУРГЕР =====
+        function toggleMenu() {
+            document.getElementById('mobileNav').classList.toggle('active');
+            document.getElementById('burgerBtn').classList.toggle('active');
+        }
+
+        // ===== ЗАПУСК =====
+        renderPage();
+    </script>
+</body>
+</html>
