@@ -504,20 +504,99 @@ let gameWords = [
 
 function renderGamePage(main) {
     main.innerHTML = `
-        <div class="card" style="max-width:600px; padding:10px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <span id="gameScore">⭐ 0</span>
-                <span id="gameLives">❤️❤️❤️</span>
-                <span id="gameBest">🏆 ${localStorage.getItem('mickeyRunnerBest') || 0}</span>
+        <div style="display:flex; justify-content:center; align-items:center; min-height:70vh;">
+            <!-- Окно в стиле Mac OS -->
+            <div style="
+                background: #f0f0f0;
+                border: 3px solid #555;
+                border-radius: 8px;
+                box-shadow: 6px 6px 0 #333;
+                padding: 0;
+                max-width: 420px;
+                width: 100%;
+                font-family: 'Press Start 2P', cursive;
+                image-rendering: pixelated;
+            ">
+                <!-- Шапка окна с кнопками -->
+                <div style="
+                    background: #ddd;
+                    padding: 8px 12px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    border-bottom: 3px solid #999;
+                ">
+                    <!-- Красная кнопка (закрыть) -->
+                    <button onclick="showPage('word')" style="
+                        width: 14px; height: 14px;
+                        background: #ff5f57;
+                        border: 2px solid #cc0000;
+                        border-radius: 0;
+                        cursor: pointer;
+                        padding: 0;
+                        font-size: 0;
+                        line-height: 0;
+                    " title="Закрыть"></button>
+
+                    <!-- Жёлтая кнопка (свернуть) -->
+                    <button onclick="showPage('word')" style="
+                        width: 14px; height: 14px;
+                        background: #ffbd2e;
+                        border: 2px solid #cc8800;
+                        border-radius: 0;
+                        cursor: pointer;
+                        padding: 0;
+                        font-size: 0;
+                        line-height: 0;
+                    " title="Свернуть"></button>
+
+                    <!-- Зелёная кнопка (расширить) -->
+                    <button onclick="alert('И так хорошо! 😺')" style="
+                        width: 14px; height: 14px;
+                        background: #27c93f;
+                        border: 2px solid #008800;
+                        border-radius: 0;
+                        cursor: pointer;
+                        padding: 0;
+                        font-size: 0;
+                        line-height: 0;
+                    " title="На весь экран"></button>
+
+                    <!-- Заголовок окна -->
+                    <span style="
+                        font-size: 8px;
+                        color: #333;
+                        margin-left: 10px;
+                        flex: 1;
+                        text-align: center;
+                    ">Mickey Runner</span>
+                </div>
+
+                <!-- Тело окна (игра) -->
+                <div style="padding: 10px; background: #fff;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <span id="gameScore" style="font-size:8px;">⭐ 0</span>
+                        <span id="gameLives" style="font-size:8px;">❤️❤️❤️</span>
+                        <span id="gameBest" style="font-size:8px;">🏆 ${localStorage.getItem('mickeyRunnerBest') || 0}</span>
+                    </div>
+                    <canvas id="gameCanvas" width="380" height="400"
+                        style="width:100%; height:auto; border:2px solid #ccc; image-rendering:pixelated; background:#87CEEB;">
+                    </canvas>
+                    <p style="font-size:6px; margin-top:6px; color:#555; text-align:center;">
+                        🖱️ Тап / клик — прыжок
+                    </p>
+                    <div style="text-align:center; margin-top:6px;">
+                        <button onclick="startGame()" id="gameStartBtn"
+                            style="font-size:8px; padding:8px 16px; background:#ddd; border:2px solid #999; cursor:pointer;">
+                            ▶️ Играть
+                        </button>
+                        <button onclick="shareGameScore()" id="gameShareBtn"
+                            style="display:none; font-size:8px; padding:8px 16px; background:#ddd; border:2px solid #999; cursor:pointer;">
+                            📤 Поделиться
+                        </button>
+                    </div>
+                </div>
             </div>
-            <canvas id="gameCanvas" width="380" height="400" 
-                style="width:100%; height:auto; border:2px solid var(--border); image-rendering:pixelated; background:#87CEEB;">
-            </canvas>
-            <p style="font-size:7px; margin-top:8px; color:var(--text);">
-                🖱️ Тап / клик — прыжок<br>Собирай правильные переводы!
-            </p>
-            <button onclick="startGame()" id="gameStartBtn" style="margin-top:5px;">▶️ Играть</button>
-            <button onclick="shareGameScore()" id="gameShareBtn" style="display:none; margin-top:5px;">📤 Поделиться рекордом</button>
         </div>`;
 }
 
