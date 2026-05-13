@@ -887,21 +887,25 @@ let builderWords = [
     { en: "sun", ru: "солнце" },
     { en: "moon", ru: "луна" },
     { en: "star", ru: "звезда" },
-    { en: "happy", ru: "счастливый" }
+    { en: "happy", ru: "счастливый" },
+    { en: "sad", ru: "грустный" },
+    { en: "big", ru: "большой" },
+    { en: "small", ru: "маленький" },
+    { en: "red", ru: "красный" },
+    { en: "blue", ru: "синий" }
 ];
 let builderCurrentWord = null;
 let builderLives = 3;
 let builderScore = 0;
 let builderSlots = [];
 let builderPoolLetters = [];
-let builderDragging = null;
 
 function renderWordBuilderPage(main) {
     builderLives = 3;
     builderScore = 0;
     pickBuilderWord();
     main.innerHTML = `
-        <div class="game-window" style="max-width:500px; margin:auto;">
+        <div style="max-width:500px; margin:auto;">
             <div style="background:#f0f0f0; border:3px solid #555; border-radius:8px; box-shadow:6px 6px 0 #333; padding:0;">
                 <div style="background:#ddd; padding:8px 12px; display:flex; align-items:center; gap:8px; border-bottom:3px solid #999;">
                     <button onclick="showPage('word')" style="width:14px;height:14px;background:#ff5f57;border:2px solid #cc0000;border-radius:0;cursor:pointer;padding:0;font-size:0;"></button>
@@ -914,15 +918,16 @@ function renderWordBuilderPage(main) {
                         <span>⭐ <span id="builderScore">0</span></span>
                         <span id="builderLives">❤️❤️❤️</span>
                     </div>
-                    <p style="font-size:8px; text-align:center;">Собери слово: <strong>${builderCurrentWord.ru}</strong></p>
+                    <p style="font-size:8px; text-align:center;">Собери слово: <strong id="builderWordHint">${builderCurrentWord.ru}</strong></p>
                     <div class="builder-container">
                         <div class="slots" id="slotsContainer"></div>
                         <div class="letter-pool" id="letterPool"></div>
                     </div>
-                    <div class="word-builder-buttons">
-                        <button onclick="checkBuilderWord()" style="font-size:8px;">✅ Проверить</button>
-                        <button onclick="resetBuilder()" style="font-size:8px;">🔄 Сбросить</button>
+                    <div class="word-builder-buttons" style="text-align:center; margin-top:12px;">
+                        <button onclick="checkBuilderWord()" style="font-size:9px; padding:10px 20px;">✅ Проверить</button>
+                        <button onclick="resetBuilder()" style="font-size:9px; padding:10px 20px;">🔄 Сбросить</button>
                     </div>
+                    <div id="builderMsg" class="mickey-hint" style="text-align:center;"></div>
                 </div>
             </div>
         </div>`;
@@ -935,14 +940,16 @@ function pickBuilderWord() {
 
 function initBuilder() {
     const slotsContainer = document.getElementById('slotsContainer');
+    if (!slotsContainer) return;
     slotsContainer.innerHTML = '';
     builderSlots = [];
     for (let i = 0; i < builderCurrentWord.en.length; i++) {
         const slot = document.createElement('div');
         slot.className = 'slot';
         slot.dataset.index = i;
-        // Тап по слоту — вернуть букву в пул
-        slot.addEventListener('click', () => removeFromSlot(i));
+        slot.addEventListener('click', function() {
+            removeFromSlot(parseInt(this.dataset.index));
+        });
         slotsContainer.appendChild(slot);
         builderSlots.push({ element: slot, letter: null });
     }
@@ -967,6 +974,7 @@ function initBuilder() {
 
 function renderPool() {
     const pool = document.getElementById('letterPool');
+    if (!pool) return;
     pool.innerHTML = '';
     builderPoolLetters.forEach((letter, index) => {
         const block = document.createElement('div');
@@ -974,19 +982,17 @@ function renderPool() {
         block.textContent = letter;
         block.dataset.letter = letter;
         block.dataset.poolIndex = index;
-        // Тап по букве — перенести в первый свободный слот
-        block.addEventListener('click', () => placeToSlot(letter, index));
+        block.addEventListener('click', function() {
+            placeToSlot(this.dataset.letter, parseInt(this.dataset.poolIndex));
+        });
         pool.appendChild(block);
     });
     updateSlots();
 }
 
 function placeToSlot(letter, poolIndex) {
-    // Ищем первый свободный слот
     const freeSlot = builderSlots.find(s => s.letter === null);
-    if (!freeSlot) return; // все слоты заняты
-
-    // Удаляем букву из пула
+    if (!freeSlot) return;
     builderPoolLetters.splice(poolIndex, 1);
     freeSlot.letter = letter;
     freeSlot.element.textContent = letter;
@@ -996,16 +1002,13 @@ function placeToSlot(letter, poolIndex) {
 
 function removeFromSlot(slotIndex) {
     const slot = builderSlots[slotIndex];
-    if (slot.letter === null) return; // пустой слот
-
-    // Возвращаем букву в пул
+    if (!slot || slot.letter === null) return;
     builderPoolLetters.push(slot.letter);
     slot.letter = null;
     slot.element.textContent = '';
     slot.element.classList.remove('filled');
     renderPool();
 }
-
 
 function updateSlots() {
     builderSlots.forEach((slot, i) => {
@@ -1017,6 +1020,34 @@ function updateSlots() {
             slot.element.classList.remove('filled');
         }
     });
+}
+
+function checkBuilderWord() {
+    const userWord = builderSlots.map(s => s.letter || '').join('');
+    const msg = document.getElementById('builderMsg');
+    if (userWord === builderCurrentWord.en) {
+        builderScore += 10;
+        document.getElementById('builderScore').textContent = builderScore;
+        if (msg) msg.textContent = '✅ Правильно! Микки рад! 🐱';
+        setTimeout(() => { resetBuilder(); if (msg) msg.textContent = ''; }, 1000);
+    } else {
+        builderLives--;
+        updateBuilderLives();
+        if (builderLives <= 0) {
+            if (msg) msg.textContent = '💔 Игра окончена! Счёт: ' + builderScore;
+            setTimeout(() => showPage('word'), 1500);
+        } else {
+            if (msg) msg.textContent = '❌ Неправильно! Осталось жизней: ' + builderLives;
+            setTimeout(() => { resetBuilder(); if (msg) msg.textContent = ''; }, 1000);
+        }
+    }
+}
+
+function resetBuilder() {
+    pickBuilderWord();
+    const hint = document.getElementById('builderWordHint');
+    if (hint) hint.textContent = builderCurrentWord.ru;
+    initBuilder();
 }
 
 function updateBuilderLives() {
