@@ -328,7 +328,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             _("Слово сохранено в изученные!", "Word saved as learned!", lang),
             reply_markup=main_menu_keyboard(lang)
         )
-        elif data == "translate_task":
+    elif data == "translate_task":
         if not user["is_pro"]:
             await query.answer(_("Доступно только в Pro", "Only available in Pro", lang), show_alert=True)
             return
