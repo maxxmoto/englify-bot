@@ -949,6 +949,28 @@ function initBuilder() {
         builderSlots.push({ element: slot, letter: null });
     }
 
+    // Берём буквы загаданного слова
+    const letters = builderCurrentWord.en.split('');
+    
+    // Добавляем 2-3 лишние буквы (другие, не из слова)
+    const alphabet = 'abcdefghijklmnopqrstuvwxyz';
+    const extraCount = Math.min(3, Math.floor(letters.length / 2));
+    for (let i = 0; i < extraCount; i++) {
+        let extraLetter;
+        do {
+            extraLetter = alphabet[Math.floor(Math.random() * alphabet.length)];
+        } while (letters.includes(extraLetter));
+        letters.push(extraLetter);
+    }
+
+    // Перемешиваем
+    for (let i = letters.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [letters[i], letters[j]] = [letters[j], letters[i]];
+    }
+    builderPoolLetters = letters;
+    renderPool();
+}
     // Создаём пул перемешанных букв
     const letters = builderCurrentWord.en.split('');
     // Добавим пару лишних случайных букв для сложности
