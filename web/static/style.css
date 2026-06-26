@@ -21,7 +21,7 @@
 body {
     margin: 0;
     background: var(--bg);
-    font-family: 'Press Start 2P', cursive;
+    font-family: 'Press Start 2P', 'Courier New', monospace, cursive;
     color: var(--text);
     image-rendering: pixelated;
     -webkit-tap-highlight-color: transparent;
@@ -656,7 +656,7 @@ body.theme-night .cloud {
 
 /* Ночной фон */
 body.theme-night {
-    background-image: url('/static/night.jpg');
+    background-image: url('/static/night.webp');
     background-size: cover;
     background-attachment: fixed;
     background-position: center;
@@ -664,7 +664,7 @@ body.theme-night {
 
 /* Дневной фон */
 body.theme-day {
-    background-image: url('/static/day.jpg');
+    background-image: url('/static/day.webp');
     background-size: cover;
     background-attachment: fixed;
     background-position: center;

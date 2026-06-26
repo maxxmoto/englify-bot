@@ -17,11 +17,12 @@
     <meta name="twitter:title" content="Englify – учи английский с Микки">
     <meta name="twitter:description" content="Изучай английский каждый день с Микки! Слово дня, задания, грамматика.">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <link rel="icon" type="image/png" href="logo.png">
-    <link rel="apple-touch-icon" href="logo.png">
+    <link rel="icon" type="image/png" href="logo.webp">
+    <link rel="apple-touch-icon" href="logo.webp">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"></noscript>
     <style>
         :root {
             --bg: #fefaf3; --card-bg: #ffffff; --border: #e0b88a; --dark: #4a3b2f;
@@ -35,13 +36,13 @@
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            font-family: 'Press Start 2P', cursive; background: var(--bg); color: var(--text);
+            font-family: 'Press Start 2P', 'Courier New', monospace, cursive; background: var(--bg); color: var(--text);
             min-height: 100vh; transition: background 0.5s, color 0.5s;
-            background-image: url('day.jpg'); background-size: cover;
+            background-image: url('day.webp'); background-size: cover;
             background-attachment: fixed; background-position: center;
             position: relative; overflow-x: hidden;
         }
-        body.theme-night { background-image: url('night.jpg'); background-color: #1a1a2e; }
+        body.theme-night { background-image: url('night.webp'); background-color: #1a1a2e; }
 
         /* Облака */
         .sky { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: hidden; }
@@ -191,7 +192,7 @@ canvas {
 
     <!-- Шапка -->
     <header>
-        <img id="logoImg" src="logo.png" alt="Englify" class="logo-img" width="50" height="50">
+        <img id="logoImg" src="logo.webp" alt="Englify" class="logo-img">
         <div class="header-right">
             <button class="theme-btn" onclick="toggleTheme()">
                 <img id="themeIcon" src="daymod.png" class="theme-icon" alt="Тема" width="28" height="28">
@@ -538,13 +539,13 @@ canvas {
                 body.classList.remove('theme-night');
                 body.classList.add('theme-day');
                 document.getElementById('themeIcon').src = 'daymod.png';
-                document.getElementById('logoImg').src = 'logo.png';
+                document.getElementById('logoImg').src = 'logo.webp';
                 localStorage.setItem('engTheme', 'day');
             } else {
                 body.classList.remove('theme-day');
                 body.classList.add('theme-night');
                 document.getElementById('themeIcon').src = 'nightmod.png';
-                document.getElementById('logoImg').src = 'nlogo.png';
+                document.getElementById('logoImg').src = 'nlogo.webp';
                 localStorage.setItem('engTheme', 'night');
             }
         }
@@ -556,7 +557,7 @@ canvas {
                 document.body.classList.remove('theme-day');
                 document.body.classList.add('theme-night');
                 document.getElementById('themeIcon').src = 'nightmod.png';
-                document.getElementById('logoImg').src = 'nlogo.png';
+                document.getElementById('logoImg').src = 'nlogo.webp';
             }
         })();
 

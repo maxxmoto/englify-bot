@@ -1,13 +1,11 @@
-import random
 import sys
 import os
-from grammar import GRAMMAR_LEVELS
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, redirect, url_for
+from db_data import get_word, get_verbs, get_test_questions, get_grammar_levels, init_tables, populate_if_empty
 
 # Подтягиваем модули из папки бота
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from content import get_daily_word, generate_tasks
-from irregular_verbs import IRREGULAR_VERBS
+from content import generate_tasks
 
 app = Flask(__name__)
 
@@ -21,10 +19,9 @@ def add_headers(response):
 
 @app.route('/')
 def index():
-    from test_data import TEST_QUESTIONS
-    today = 0  # или реальный день года
-    word = get_daily_word(today)
-    return render_template('index.html', word=word, test_questions=TEST_QUESTIONS)
+    today = 0
+    word = get_word(today)
+    return render_template('index.html', word=word, test_questions=get_test_questions())
 
 @app.route('/tasks')
 def tasks_page():
@@ -32,7 +29,7 @@ def tasks_page():
 
 @app.route('/verbs')
 def verbs_page():
-    verbs = random.sample(IRREGULAR_VERBS, min(10, len(IRREGULAR_VERBS)))
+    verbs = get_verbs(10)
     return render_template('verbs.html', verbs=verbs)
 
 @app.route('/words')
@@ -69,8 +66,7 @@ def voice(word):
 # страница теста
 @app.route('/test')
 def test_page():
-    from test_data import TEST_QUESTIONS
-    return render_template('test.html', questions=TEST_QUESTIONS)
+    return render_template('test.html', questions=get_test_questions())
 
 @app.route('/pro')
 def pro_page():
@@ -78,21 +74,23 @@ def pro_page():
 
 @app.route('/grammar')
 def grammar_levels():
-    return render_template('grammar_levels.html', levels=GRAMMAR_LEVELS)
+    gl = get_grammar_levels()
+    return render_template('grammar_levels.html', levels=gl)
 
 @app.route('/grammar/<level>')
 def grammar_topic_list(level):
-    if level not in GRAMMAR_LEVELS:
+    gl = get_grammar_levels()
+    if level not in gl:
         return redirect(url_for('grammar_levels'))
-    topics = GRAMMAR_LEVELS[level]['topics']
-    return render_template('grammar_topics.html', level=level, topics=topics, level_title=GRAMMAR_LEVELS[level]['title'])
+    return render_template('grammar_topics.html', level=level, topics=gl[level]['topics'], level_title=gl[level]['title'])
 
 @app.route('/grammar/<level>/<int:topic_id>')
 def grammar_topic(level, topic_id):
-    if level not in GRAMMAR_LEVELS:
+    gl = get_grammar_levels()
+    if level not in gl:
         return redirect(url_for('grammar_levels'))
     topic = None
-    for t in GRAMMAR_LEVELS[level]['topics']:
+    for t in gl[level]['topics']:
         if t['id'] == topic_id:
             topic = t
             break
@@ -102,4 +100,6 @@ def grammar_topic(level, topic_id):
 
 
 if __name__ == '__main__':
+    init_tables()
+    populate_if_empty()
     app.run(debug=True, port=5000)

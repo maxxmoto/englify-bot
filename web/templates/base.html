@@ -18,11 +18,12 @@
     <meta name="twitter:title" content="Englify – учи английский с Микки">
     <meta name="twitter:description" content="Изучай английский каждый день с Микки! Слово дня, задания, грамматика.">
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
-    <link rel="apple-touch-icon" href="{{ url_for('static', filename='logo.png') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.webp') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='logo.webp') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"></noscript>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <script type="application/ld+json">
     {
@@ -46,7 +47,7 @@
     <!-- Шапка -->
     <header>
         <a href="/" class="logo-link">
-            <img id="logoImg" src="{{ url_for('static', filename='logo.PNG') }}" alt="Englify" class="logo-img" width="80" height="80">
+            <img id="logoImg" src="{{ url_for('static', filename='logo.webp') }}" alt="Englify" class="logo-img">
         </a>
 
         <!-- Десктопное меню -->
@@ -145,13 +146,13 @@
                 body.classList.remove('theme-day');
                 body.classList.add('theme-night');
                 themeIcon.src = "{{ url_for('static', filename='nightmod.png') }}";
-                logoImg.src = "{{ url_for('static', filename='nlogo.png') }}";
+                logoImg.src = "{{ url_for('static', filename='nlogo.webp') }}";
                 localStorage.setItem('engTheme', 'night');
             } else {
                 body.classList.remove('theme-night');
                 body.classList.add('theme-day');
                 themeIcon.src = "{{ url_for('static', filename='daymod.png') }}";
-                logoImg.src = "{{ url_for('static', filename='logo.PNG') }}";
+                logoImg.src = "{{ url_for('static', filename='logo.webp') }}";
                 localStorage.setItem('engTheme', 'day');
             }
         }

@@ -8,9 +8,8 @@ import pytz
 from dotenv import load_dotenv
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, LabeledPrice
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, PreCheckoutQueryHandler, MessageHandler, filters, ContextTypes
-from content import get_daily_word, generate_tasks
-from test_data import TEST_QUESTIONS
-from irregular_verbs import IRREGULAR_VERBS
+from content import generate_tasks
+from db_data import get_word, get_verbs, get_all_verbs, get_test_questions, init_tables, populate_if_empty
 from gtts import gTTS
 import io
 
@@ -134,7 +133,7 @@ def main_menu_keyboard(lang):
 async def daily_job(app):
     now = datetime.now(MOSCOW_TZ)
     day_of_year = now.timetuple().tm_yday - 1
-    word_data = get_daily_word(day_of_year)
+    word_data = get_word(day_of_year)
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("SELECT user_id, language FROM users")
@@ -202,17 +201,19 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if data == "start_test":
         context.user_data["test_index"] = 0
         context.user_data["test_score"] = 0
+        context.user_data["test_questions"] = get_test_questions()
         await send_test_question(query, context, uid, lang)
     elif data.startswith("test_"):
+        questions = context.user_data.get("test_questions", get_test_questions())
         idx = context.user_data.get("test_index", 0)
-        if idx >= len(TEST_QUESTIONS):
+        if idx >= len(questions):
             return
         chosen = int(data.split("_")[1])
-        correct = TEST_QUESTIONS[idx]["correct"]
+        correct = questions[idx]["correct"]
         if chosen == correct:
             context.user_data["test_score"] += 1
         context.user_data["test_index"] += 1
-        if context.user_data["test_index"] < len(TEST_QUESTIONS):
+        if context.user_data["test_index"] < len(questions):
             await send_test_question(query, context, uid, lang)
         else:
             score = context.user_data["test_score"]
@@ -356,7 +357,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif data == "menu_verbs":
         context.user_data["verb_score"] = 0
         context.user_data["verb_index"] = 0
-        verbs = random.sample(IRREGULAR_VERBS, min(10, len(IRREGULAR_VERBS)))
+        verbs = get_verbs(10)
         context.user_data["verbs"] = verbs
         await ask_verb_question(query, context, lang)
     elif data.startswith("verb_"):
@@ -399,7 +400,7 @@ async def ask_verb_question(query, context, lang, prefix=""):
     verb = verbs[idx]
     # Варианты: правильная форма V3, случайные другие V3
     correct_form = verb["v3"]
-    other_forms = [v["v3"] for v in IRREGULAR_VERBS if v["v3"] != correct_form]
+    other_forms = [v["v3"] for v in get_all_verbs() if v["v3"] != correct_form]
     random_forms = random.sample(other_forms, min(2, len(other_forms)))
     options = [correct_form] + random_forms
     random.shuffle(options)
@@ -414,10 +415,11 @@ async def ask_verb_question(query, context, lang, prefix=""):
     await query.edit_message_text(prefix + question_text, reply_markup=InlineKeyboardMarkup(buttons))
 
 async def send_test_question(query, context, uid, lang):
+    questions = context.user_data.get("test_questions", get_test_questions())
     idx = context.user_data["test_index"]
-    q = TEST_QUESTIONS[idx]
-    text = (f"Вопрос {idx+1}/{len(TEST_QUESTIONS)}: {q['question']}" if lang == 'ru'
-            else f"Question {idx+1}/{len(TEST_QUESTIONS)}: {q['question']}")
+    q = questions[idx]
+    text = (f"Вопрос {idx+1}/{len(questions)}: {q['question']}" if lang == 'ru'
+            else f"Question {idx+1}/{len(questions)}: {q['question']}")
     buttons = [[InlineKeyboardButton(opt, callback_data=f"test_{i}")] for i, opt in enumerate(q["options"])]
     await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(buttons))
 
@@ -516,6 +518,8 @@ if __name__ == "__main__":
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
     init_db()
+    init_tables()
+    populate_if_empty()
     app = Application.builder().token(TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
