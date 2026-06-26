@@ -132,6 +132,9 @@ def get_all_users_stats():
 def _(text_ru, text_en, lang):
     return text_en if lang == 'en' else text_ru
 
+def back_button(lang):
+    return InlineKeyboardMarkup([[InlineKeyboardButton(_("⬅ Назад в меню", "⬅ Back to menu", lang), callback_data="back_main")]])
+
 def main_menu_keyboard(lang):
     labels = {
         'ru': {"tasks": "📝 Задания", "verbs": "🐾 Глаголы", "words": "📚 Мои слова",
@@ -258,7 +261,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
              InlineKeyboardButton(_("🔴 Профи", "🔴 Pro", lang), callback_data="set_pro")]
         ]
         await query.edit_message_text(_("Выбери уровень:", "Choose your level:", lang),
-                                      reply_markup=InlineKeyboardMarkup(keyboard))
+                                      reply_markup=InlineKeyboardMarkup(keyboard + [[InlineKeyboardButton("⬅ Назад", callback_data="back_main")]]))
     elif data.startswith("set_"):
         level = data[4:]
         update_user(uid, level=level)
@@ -323,7 +326,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             text = _("📚 Выученные слова:\n", "📚 Learned words:\n", lang)
             for w, d in words:
                 text += f"• {w} ({d})\n"
-        await query.edit_message_text(text, reply_markup=main_menu_keyboard(lang))
+        await query.edit_message_text(text, reply_markup=back_button(lang))
     elif data == "menu_level":
         keyboard = [
             [InlineKeyboardButton(_("🟢 Новичок", "🟢 Novice", lang), callback_data="set_novice"),
@@ -331,7 +334,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
              InlineKeyboardButton(_("🔴 Профи", "🔴 Pro", lang), callback_data="set_pro")]
         ]
         await query.edit_message_text(_("Выбери уровень:", "Choose your level:", lang),
-                                      reply_markup=InlineKeyboardMarkup(keyboard))
+                                      reply_markup=InlineKeyboardMarkup(keyboard + [[InlineKeyboardButton("⬅ Назад", callback_data="back_main")]]))
     elif data == "menu_mode":
         new_lang = "en" if lang == "ru" else "ru"
         update_user(uid, language=new_lang)
@@ -463,6 +466,7 @@ async def ask_verb_question(query, context, lang, prefix=""):
         lang
     )
     buttons = [[InlineKeyboardButton(opt, callback_data=f"verb_{i}")] for i, opt in enumerate(options)]
+    buttons.append([InlineKeyboardButton("⬅ Назад", callback_data="back_main")])
     await query.edit_message_text(prefix + question_text, reply_markup=InlineKeyboardMarkup(buttons))
 
 async def show_ege_question(query, context, task, q_idx, lang, uid):
@@ -492,6 +496,7 @@ async def show_ege_question(query, context, task, q_idx, lang, uid):
             f"Which heading fits?", lang
         )
         buttons = [[InlineKeyboardButton(f"{i}. {task['headings'][i-1][:50]}", callback_data=f"ege_ans_{task['id']}_{q_idx}_{i}")] for i in range(1, 8)]
+        buttons.append([InlineKeyboardButton("⬅ Назад", callback_data="back_main")])
 
     elif fmt == 'true_false':
         stmt = task['statements'][q_idx]
@@ -502,7 +507,8 @@ async def show_ege_question(query, context, task, q_idx, lang, uid):
         buttons = [
             [InlineKeyboardButton("1 ✅ True", callback_data=f"ege_ans_{task['id']}_{q_idx}_1"),
              InlineKeyboardButton("2 ❌ False", callback_data=f"ege_ans_{task['id']}_{q_idx}_2"),
-             InlineKeyboardButton("3 ❓ Not stated", callback_data=f"ege_ans_{task['id']}_{q_idx}_3")]
+             InlineKeyboardButton("3 ❓ Not stated", callback_data=f"ege_ans_{task['id']}_{q_idx}_3")],
+            [InlineKeyboardButton("⬅ Назад", callback_data="back_main")]
         ]
 
     elif fmt == 'multiple_choice':
@@ -512,6 +518,7 @@ async def show_ege_question(query, context, task, q_idx, lang, uid):
             f"**{task['theme']}**\nQuestion {q['num']}\n\n{q['text']}", lang
         )
         buttons = [[InlineKeyboardButton(opt[:60], callback_data=f"ege_ans_{task['id']}_{q_idx}_{i}")] for i, opt in enumerate(q['options'])]
+        buttons.append([InlineKeyboardButton("⬅ Назад", callback_data="back_main")])
 
     await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(buttons))
 
@@ -537,6 +544,7 @@ async def send_test_question(query, context, uid, lang):
     text = (f"Вопрос {idx+1}/{len(questions)}: {q['question']}" if lang == 'ru'
             else f"Question {idx+1}/{len(questions)}: {q['question']}")
     buttons = [[InlineKeyboardButton(opt, callback_data=f"test_{i}")] for i, opt in enumerate(q["options"])]
+    buttons.append([InlineKeyboardButton("⬅ Назад", callback_data="back_main")])
     await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(buttons))
 
 async def show_task(query, task, lang, uid, prefix=""):
@@ -546,6 +554,7 @@ async def show_task(query, task, lang, uid, prefix=""):
         buttons.append([InlineKeyboardButton(opt, callback_data=f"answer_{i}")])
     if lang == 'en':
         buttons.append([InlineKeyboardButton("🔍 Translate", callback_data="translate_task")])
+    buttons.append([InlineKeyboardButton("⬅ Назад", callback_data="back_main")])
     await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(buttons))
 
 async def send_pro_invoice(query, uid, lang, context):

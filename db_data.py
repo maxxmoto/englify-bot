@@ -1,10 +1,10 @@
 import sqlite3
 import json
 import random
+import sys, os
 from content import WORDS_OF_DAY
 from irregular_verbs import IRREGULAR_VERBS
 from test_data import TEST_QUESTIONS
-from grammar import GRAMMAR_LEVELS
 
 DB_PATH = "englify.db"
 
@@ -80,6 +80,8 @@ def populate_if_empty():
 
     c.execute("SELECT COUNT(*) FROM grammar_levels")
     if c.fetchone()[0] == 0:
+        sys.path.append(os.path.join(os.path.dirname(__file__), 'web'))
+        from grammar import GRAMMAR_LEVELS
         for level_key, level_data in GRAMMAR_LEVELS.items():
             c.execute("INSERT INTO grammar_levels (level, title) VALUES (?,?)",
                       (level_key, level_data["title"]))
