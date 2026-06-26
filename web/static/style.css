@@ -1,0 +1,676 @@
+:root {
+    --bg: #fefaf3;
+    --card-bg: #ffffff;
+    --border: #e0b88a;
+    --dark: #4a3b2f;
+    --accent: #ffd9b0;
+    --hover: #ffc489;
+    --text: #4a3b2f;
+    --header-bg: #ffd9b0;
+    --footer-bg: transparent;
+    --modal-bg: #fefaf3;
+    --input-bg: #fff;
+    --progress-bg: #e0d6c2;
+    --progress-fill: #ffd9b0;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    font-family: 'Press Start 2P', cursive;
+    color: var(--text);
+    image-rendering: pixelated;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* ===== ШАПКА ===== */
+header {
+    background: var(--accent);
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 4px solid var(--border);
+    position: relative;
+    z-index: 100;
+}
+
+.logo-img {
+    height: 80px;
+    image-rendering: pixelated;
+}
+
+/* Навигация (десктоп) */
+nav {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+nav a {
+    text-decoration: none;
+    color: var(--dark);
+    font-size: 11px;
+    padding: 10px 14px;
+    border: 2px solid transparent;
+    white-space: nowrap;
+    transition: all 0.1s ease;
+}
+
+nav a:hover {
+    border-bottom: 3px solid var(--dark);
+    background: rgba(255,255,255,0.3);
+}
+
+/* Бургер-кнопка (скрыта на десктопе) */
+.burger-btn {
+    display: none;
+    flex-direction: column;
+    gap: 6px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    position: relative;
+    z-index: 260;
+}
+
+.burger-btn span {
+    display: block;
+    width: 30px;
+    height: 4px;
+    background: var(--dark);
+    border-radius: 2px;
+    transition: 0.3s;
+}
+
+.burger-btn.active span:nth-child(1) {
+    transform: rotate(45deg) translate(7px, 7px);
+}
+.burger-btn.active span:nth-child(2) {
+    opacity: 0;
+}
+.burger-btn.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -7px);
+}
+
+/* Мобильное меню */
+.mobile-nav {
+    display: flex;
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 80%;
+    max-width: 320px;
+    height: 100vh;
+    background: var(--accent);
+    border-left: 4px solid var(--border);
+    padding: 100px 20px 30px;
+    flex-direction: column;
+    gap: 15px;
+    z-index: 250;
+    transition: right 0.3s ease;
+    box-shadow: -4px 0 10px rgba(0,0,0,0.15);
+    overflow-y: auto;
+}
+
+.mobile-nav.active {
+    right: 0;
+}
+
+.mobile-nav a {
+    font-size: 11px;
+    padding: 14px 16px;
+    border: 2px solid var(--border);
+    background: var(--card-bg);
+    text-decoration: none;
+    color: var(--dark);
+    text-align: center;
+    display: block;
+}
+
+.mobile-nav a:active {
+    background: var(--hover);
+}
+
+/* ===== ОСНОВНОЙ КОНТЕНТ ===== */
+main {
+    padding: 20px;
+    min-height: 70vh;
+}
+
+.card {
+    background: var(--card-bg);
+    border: 3px solid var(--border);
+    box-shadow: 4px 4px 0px #d9a36a;
+    padding: 25px;
+    margin: 20px auto;
+    max-width: 550px;
+    width: 100%;
+    text-align: center;
+    font-size: 10px;
+    line-height: 1.8;
+    content-visibility: auto;
+    contain-intrinsic-size: 300px;
+}
+
+.daily-card {
+    background: #fff5e6;
+    border-color: #f0b27a;
+    box-shadow: 6px 6px 0 #e09e5b;
+}
+
+.word {
+    font-size: 28px;
+    margin: 10px 0;
+    word-break: break-word;
+}
+
+.translation {
+    font-size: 12px;
+    color: #777;
+}
+
+.example {
+    font-style: italic;
+    margin: 15px 0;
+    word-break: break-word;
+}
+
+.options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.option-btn {
+    font-family: inherit;
+    background: var(--accent);
+    border: 2px solid var(--border);
+    padding: 14px 12px;
+    cursor: pointer;
+    font-size: 10px;
+    text-decoration: none;
+    color: var(--dark);
+    display: block;
+    text-align: center;
+}
+
+.option-btn:hover {
+    background: var(--hover);
+}
+
+.option-btn.correct {
+    background: #b2f0b2;
+    animation: bounce 0.4s;
+}
+
+.option-btn.wrong {
+    background: #f0b2b2;
+}
+
+.actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+button {
+    font-family: inherit;
+    background: var(--accent);
+    border: 2px solid var(--border);
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 10px;
+    -webkit-appearance: none;
+}
+
+button:hover {
+    background: var(--hover);
+}
+
+/* ===== ПРОГРЕСС-БАР ===== */
+.progress-card {
+    max-width: 550px;
+    margin: 20px auto;
+}
+
+.progress-bar-container {
+    width: 100%;
+    height: 24px;
+    background: #e0d6c2;
+    border: 2px solid #b8a587;
+    margin: 15px 0;
+    box-shadow: inset 2px 2px 0 #c0b090;
+}
+
+.progress-bar {
+    height: 100%;
+    background: #ffd9b0;
+    border-right: 2px solid #e8b88a;
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+/* ===== СЛОВАРЬ ===== */
+#wordList {
+    list-style: none;
+    padding: 0;
+    margin: 15px 0;
+    text-align: left;
+}
+
+#wordList li {
+    padding: 10px 14px;
+    border: 2px solid var(--border);
+    margin-bottom: 8px;
+    background: #fffdf7;
+    font-size: 9px;
+    word-break: break-word;
+}
+
+/* ===== МОДАЛЬНЫЕ ОКНА ===== */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.modal.show {
+    display: flex;
+}
+
+.modal-content {
+    background: var(--bg);
+    border: 4px solid var(--border);
+    box-shadow: 8px 8px 0 #d9a36a;
+    padding: 25px;
+    max-width: 600px;
+    width: 100%;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    font-size: 9px;
+    line-height: 1.6;
+    position: relative;
+    flex-direction: column;
+}
+
+@media (min-width: 600px) {
+    .modal-content {
+        flex-direction: row;
+    }
+}
+
+.modal-content img {
+    width: 100px;
+    image-rendering: pixelated;
+    flex-shrink: 0;
+}
+
+.modal-text {
+    flex: 1;
+}
+
+.modal-text h3 {
+    margin-top: 0;
+    font-size: 12px;
+}
+
+.typing-effect {
+    border-right: 3px solid var(--dark);
+    white-space: pre-wrap;
+    overflow: hidden;
+    display: inline-block;
+    animation: blink 0.8s infinite;
+}
+
+@keyframes blink {
+    0%, 100% { border-color: var(--dark); }
+    50% { border-color: transparent; }
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    color: var(--dark);
+    z-index: 10;
+}
+
+.close-btn:hover {
+    color: red;
+}
+
+.btn-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+/* ===== ГРАММАТИКА ===== */
+.grammar-topics-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.grammar-topic-btn {
+    font-family: inherit;
+    font-size: 9px;
+    background: var(--accent);
+    border: 2px solid var(--border);
+    padding: 14px 12px;
+    text-decoration: none;
+    color: var(--dark);
+    text-align: center;
+}
+
+.grammar-topic-btn:hover {
+    background: var(--hover);
+}
+
+.grammar-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    flex-direction: column;
+}
+
+@media (min-width: 600px) {
+    .grammar-header {
+        flex-direction: row;
+    }
+}
+
+.mickey-theory-img {
+    width: 90px;
+    image-rendering: pixelated;
+}
+
+.task-input-area {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.pixel-input {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 10px;
+    padding: 12px;
+    border: 3px solid var(--border);
+    background: #fff;
+    box-shadow: inset 2px 2px 0 #e0d6c2;
+    outline: none;
+    width: 100%;
+    max-width: 300px;
+}
+
+.pixel-input:focus {
+    border-color: #d9a36a;
+}
+
+.pixel-btn {
+    font-family: inherit;
+    font-size: 10px;
+    background: var(--accent);
+    border: 2px solid var(--border);
+    padding: 12px 15px;
+    cursor: pointer;
+}
+
+.task-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    gap: 10px;
+}
+
+.task-nav span {
+    font-size: 9px;
+}
+
+/* ===== PRO ===== */
+.pro-img {
+    width: 100px;
+    image-rendering: pixelated;
+    margin-bottom: 15px;
+}
+
+/* ===== FOOTER ===== */
+footer {
+    text-align: center;
+    margin-top: 40px;
+    font-size: 8px;
+    padding: 20px;
+    line-height: 1.8;
+}
+
+.telegram-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: #4a3b2f;
+    margin-top: 10px;
+}
+
+.telegram-icon {
+    height: 24px;
+    image-rendering: pixelated;
+}
+
+.mickey-hint {
+    font-size: 9px;
+    margin-top: 15px;
+    color: #b87450;
+    animation: bounce 0.5s ease;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+/* ===== АДАПТИВНОСТЬ ===== */
+@media (max-width: 768px) {
+    nav {
+        display: none !important;
+    }
+
+    .burger-btn {
+        display: flex;
+    }
+
+    .mobile-nav {
+        display: flex;
+    }
+
+    .logo-img {
+        height: 60px;
+    }
+
+    .card {
+        padding: 18px;
+        margin: 15px auto;
+    }
+
+    .word {
+        font-size: 22px;
+    }
+
+    button, .option-btn, .grammar-topic-btn {
+        font-size: 11px;
+        padding: 14px 16px;
+    }
+
+    .modal-content {
+        padding: 20px;
+        font-size: 8px;
+    }
+}
+
+@media (max-width: 400px) {
+    .logo-img {
+        height: 50px;
+    }
+
+    .card {
+        padding: 14px;
+    }
+
+    .word {
+        font-size: 18px;
+    }
+
+    button, .option-btn {
+        font-size: 10px;
+        padding: 12px;
+    }
+}
+
+/* Ночная тема */
+body.theme-night {
+    --bg: #1a1a2e;
+    --card-bg: #16213e;
+    --border: #533483;
+    --dark: #e0d6ff;
+    --accent: #3c2a6b;
+    --hover: #5a3d8a;
+    --text: #e0d6ff;
+    --header-bg: #0f3460;
+    --footer-bg: transparent;
+    --modal-bg: #16213e;
+    --input-bg: #1a1a2e;
+    --progress-bg: #2a2a4a;
+    --progress-fill: #533483;
+}
+
+/* Применяем переменные */
+
+/* Кнопка переключения темы */
+.theme-toggle-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    margin-left: 10px;
+    z-index: 260;
+}
+.theme-icon {
+    width: 36px;
+    height: 36px;
+    image-rendering: pixelated;
+}
+
+/* ===== ОБЛАКА ===== */
+.clouds {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.cloud {
+    position: absolute;
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0.15;
+    will-change: transform;
+}
+
+/* Дневные облака (белые) */
+body.theme-day .cloud {
+    background-image: url('/static/cloud.png'); /* если есть файл облака */
+    background-color: rgba(255,255,255,0.1);
+    border-radius: 50%;
+    box-shadow: 0 0 50px rgba(255,255,255,0.3);
+}
+
+/* Ночные облака (тёмно-фиолетовые) */
+body.theme-night .cloud {
+    background-image: url('/static/cloud.png');
+    background-color: rgba(100, 80, 160, 0.2);
+    box-shadow: 0 0 50px rgba(80, 60, 140, 0.3);
+}
+
+/* Если нет картинки облака, используем круги */
+.cloud1 {
+    width: 200px;
+    height: 120px;
+    top: 10%;
+    left: -200px;
+    animation: drift 30s linear infinite;
+}
+.cloud2 {
+    width: 250px;
+    height: 150px;
+    top: 30%;
+    left: -300px;
+    animation: drift 40s linear 5s infinite;
+}
+.cloud3 {
+    width: 180px;
+    height: 100px;
+    top: 60%;
+    left: -250px;
+    animation: drift 35s linear 10s infinite;
+}
+
+@keyframes drift {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(calc(100vw + 400px));
+    }
+}
+
+/* Ночной фон */
+body.theme-night {
+    background-image: url('/static/night.jpg');
+    background-size: cover;
+    background-attachment: fixed;
+    background-position: center;
+}
+
+/* Дневной фон */
+body.theme-day {
+    background-image: url('/static/day.jpg');
+    background-size: cover;
+    background-attachment: fixed;
+    background-position: center;
+}
+
+/* Плавный переход фона */
+body {
+    transition: background-image 0.5s ease;
+}

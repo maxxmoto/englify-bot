@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+    <h2>{{ level_title }}</h2>
+    <div class="grammar-topics-list">
+        {% for topic in topics %}
+            <a href="/grammar/{{ level }}/{{ topic.id }}" class="option-btn">
+                {{ topic.title }}
+            </a>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <rect width="100" height="100" rx="20" fill="#ffd9b0"/>
+  <path d="M18 38L28 10 45 32Z M82 38L72 10 55 32Z" fill="#e0b88a"/>
+  <rect x="22" y="30" width="56" height="46" rx="8" fill="#fff" stroke="#e0b88a" stroke-width="2"/>
+  <circle cx="34" cy="48" r="4.5" fill="#4a3b2f"/>
+  <circle cx="66" cy="48" r="4.5" fill="#4a3b2f"/>
+  <circle cx="34" cy="48" r="1.5" fill="#fff"/>
+  <circle cx="66" cy="48" r="1.5" fill="#fff"/>
+  <polygon points="50,56 47,60 53,60" fill="#e0b88a"/>
+  <path d="M42 65Q50 72 58 65" fill="none" stroke="#e0b88a" stroke-width="2"/>
+  <text x="50" y="88" font-family="'Courier New',monospace" font-size="18" font-weight="bold" text-anchor="middle" fill="#4a3b2f">E</text>
+  <style>
+    @media (prefers-color-scheme:dark){
+      rect:first-child{fill:#0f3460}
+      path:first-child{fill:#533483}
+      rect:nth-child(3){fill:#16213e;stroke:#533483}
+      circle{fill:#e0d6ff}
+      circle:last-child{fill:#16213e}
+      polygon{fill:#533483}
+      path:last-child{stroke:#533483}
+      text{fill:#e0d6ff}
+    }
+  </style>
+</svg>

@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+    <div class="grammar-header">
+        <img src="{{ url_for('static', filename='smart.png') }}" alt="Микки умный" class="mickey-theory-img">
+        <div class="typing-effect" id="theoryText"></div>
+    </div>
+</div>
+<div class="card">
+    <h3>Задания</h3>
+    <div id="taskContainer">
+        <p id="taskQuestion"></p>
+        <div class="task-input-area">
+            <input type="text" id="taskAnswer" class="pixel-input" placeholder="Твой ответ">
+            <button class="pixel-btn" onclick="checkAnswer()">Проверить</button>
+        </div>
+    </div>
+    <div id="taskResult" class="mickey-hint"></div>
+    <div class="task-nav">
+        <button onclick="prevTask()">← Назад</button>
+        <span id="taskCounter">1/{{ topic.tasks|length }}</span>
+        <button onclick="nextTask()">Вперёд →</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const topic = {{ topic | tojson }};
+    let currentTask = 0;
+
+    function typeTheory() {
+        const text = topic.theory;
+        let i = 0;
+        const el = document.getElementById('theoryText');
+        function type() {
+            if (i < text.length) {
+                el.textContent += text.charAt(i);
+                i++;
+                setTimeout(type, 30);
+            } else {
+                el.classList.remove('typing-effect');
+            }
+        }
+        el.classList.add('typing-effect');
+        type();
+    }
+
+    function showTask() {
+        const task = topic.tasks[currentTask];
+        document.getElementById('taskQuestion').textContent = task.question;
+        document.getElementById('taskAnswer').value = '';
+        document.getElementById('taskResult').textContent = '';
+        document.getElementById('taskCounter').textContent = `${currentTask+1}/${topic.tasks.length}`;
+    }
+
+    function checkAnswer() {
+    const input = document.getElementById('taskAnswer');
+    const userAnswer = input.value.trim().toLowerCase();
+    const correct = topic.tasks[currentTask].answer.toLowerCase();
+    const resultEl = document.getElementById('taskResult');
+    if (userAnswer === correct) {
+        resultEl.textContent = '✅ Правильно! Микки рад!';
+        input.style.borderColor = '#b2f0b2';
+    } else {
+        resultEl.textContent = `❌ Неверно. Правильный ответ: ${correct}`;
+        input.style.borderColor = '#f0b2b2';
+    }
+    setTimeout(() => { input.style.borderColor = 'var(--border)'; }, 1500);
+}
+
+    function nextTask() {
+        if (currentTask < topic.tasks.length - 1) {
+            currentTask++;
+            showTask();
+        }
+    }
+
+    function prevTask() {
+        if (currentTask > 0) {
+            currentTask--;
+            showTask();
+        }
+    }
+
+    typeTheory();
+    showTask();
+</script>
+{% endblock %}

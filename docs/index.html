@@ -2,8 +2,25 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Englify – учи английский с Микки</title>
+    <title>Englify – учи английский с Микки каждый день</title>
+    <meta name="description" content="Englify — учи английский язык бесплатно с Микки. Слово дня, задания, грамматика, тренажёр глаголов и игры.">
+    <meta name="keywords" content="английский язык, учить английский, englify, слово дня, грамматика, irregular verbs">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Englify – учи английский с Микки">
+    <meta property="og:description" content="Ежедневные слова, задания, грамматика и игры для изучения английского.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://maxxmoto.github.io/englify-bot">
+    <meta property="og:image" content="https://maxxmoto.github.io/englify-bot/logo.png">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Englify – учи английский с Микки">
+    <meta name="twitter:description" content="Изучай английский каждый день с Микки! Слово дня, задания, грамматика.">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="apple-touch-icon" href="logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -174,10 +191,10 @@ canvas {
 
     <!-- Шапка -->
     <header>
-        <img id="logoImg" src="logo.png" alt="Englify" class="logo-img">
+        <img id="logoImg" src="logo.png" alt="Englify" class="logo-img" width="50" height="50">
         <div class="header-right">
             <button class="theme-btn" onclick="toggleTheme()">
-                <img id="themeIcon" src="daymod.png" class="theme-icon" alt="Тема">
+                <img id="themeIcon" src="daymod.png" class="theme-icon" alt="Тема" width="28" height="28">
             </button>
             <button class="burger-btn" id="burgerBtn" onclick="toggleMenu()">
                 <span></span><span></span><span></span>
@@ -202,7 +219,7 @@ canvas {
 
     <script>
         // ===== ДАННЫЕ (захардкожены) =====
-        const WORDS = ["abandon","ability","able","about","above","abroad","absence","absolute","absorb","abstract","abundant","academic","accelerate","accept","access","accident","accompany","accomplish","account","accurate","achieve","acknowledge","acquire","adapt","add","address","adequate","adjust","admire","admit","adopt","adult","advance","advantage","adventure","advertise","advice","affair","affect","afford","afraid","afternoon","again","age","agree","ahead","aim","air","airplane","alarm","album","alive","allow","almost","alone","along","already","also","although","among","amount","amuse","ancient","anger","angle","announce","annual","anxiety","apart","apologize","apparent","appear","appetite","apply","appreciate","approach","argument","arm","arrange","arrest","arrive","art","article","ashamed","aspect","assist","associate","assume","atmosphere","attach","attempt","attend","attention","attract","audience","author","autumn","available","average","avoid","awake","award","aware","awful","awkward","back","background","balance","ball","ban","bank","base","bath","battle","beach","bear","beat","beautiful","because","become","beef","beg","begin","behave","behind","believe","bell","belong","below","belt","bend","benefit","bet","beyond","bill","bin","bit","bitter","blame","blank","blind","block","blood","blow","board","boat","boil","bold","bomb","bone","book","border","borrow","boss","bother","bottle","bottom","bowl","box","boy","brain","branch","brand","brave","bread","break","breakfast","breath","brick","bridge","brief","bright","brilliant","bring","broad","broadcast","brother","brown","brush","budget","build","bullet","bunch","burn","burst","bury","bus","bush","business","butter","button","buy","cabin","cabinet","cable","cake","calculate","call","calm","camera","camp","cancel","candidate","cap","capable","capital","capture","car","card","care","career","carpet","carry","case","cash","cast","cat","catch","category","cause","celebrate","cell","center","century","certain","chain","chair","challenge","champion","chance","change","channel","chapter","character","charge","charity","chat","cheap","cheat","check","cheek","cheese","chef","chemical","chest","chicken","chief","child","chin","chocolate","choice","choose","church","cigarette","circle","citizen","city","claim","class","clean","clear","clever","click","climate","climb","clock","close","cloth","cloud","club","coach","coal","coast","coat","code","coffee","coin","cold","collar","collect","college","colour","column","combine","comfort","command","comment","commit","committee","common","communicate","community","company","compare","compete","complain","complete","complex","computer","concentrate","concept","concern","conclude","condition","conduct","conference","confidence","confirm","conflict","confuse","connect","conscious","consequence","consider","constant","construct","contact","contain","content","contest","continue","contract","contrast","contribute","control","convenient","conversation","convince","cook","cool","cooperate","copy","corner","correct","cost","cotton","cough","council","count","country","couple","courage","course","court","cover","crash","create","credit","crime","criminal","crisis","criticize","crop","cross","crowd","cry","culture","cup","cure","curious","current","curtain","curve","customer","cut","cycle","dad","daily","damage","dance","danger","dark","data","database","daughter","dawn","dead","deal","dear","debate","debt","decade","decide","decision","declare","decorate","deep","defend","define","degree","delay","deliver","demand","democracy","department","depend","describe","desert","deserve","design","desire","desk","destroy","detail","determine","develop","device","dialog","diary","dictate","die","differ","dig","digital","dinner","direct","disappear","discover","discuss","disease","display","distance","distribute","district","diverse","divide","divorce","document","dog","donate","door","double","doubt","down","download","draft","drag","drama","draw","dream","dress","drink","drive","drop","dry","duck","due","dull","dust","duty"];
+        const WORDS = ["affair","afternoon","colour","budget","close","cooperate","bridge","absence","ban","beef","board","discover","bring","bush","cheese","brand","conduct","community","chef","blow","door","adventure","boy","attach","academic","crowd","boss","boat","department","amuse","awake","above","absolute","atmosphere","destroy","curve","cheek","cap","display","bottom","border","able","among","criticize","cancel","click","brave","decade","arm","confidence","decide","attention","climate","country","acknowledge","ahead","brief","cloud","distribute","customer","autumn","broadcast","consider","construct","bend","document","belong","cycle","business","debt","bone","audience","apologize","chair","belt","die","cheat","course","crop","drag","defend","challenge","constant","century","apart","bottle","control","capture","collar","attract","chain","contribute","college","celebrate","affect","cold","deserve","character","album","cabin","beyond","background","dream","assist","adequate","card","cast","annual","carry","dawn","catch","almost","abundant","chicken","channel","cry","appreciate","adult","appetite","calculate","brown","child","crisis","condition","circle","category","argument","continue","desk","achieve","comment","climb","concept","cloth","button","blank","cotton","bother","bread","access","along","approach","brush","afford","box","danger","compete","cook","dead","anxiety","avoid","complete","available","brain","burst","chest","career","clock","carpet","cure","again","disease","dear","digital","care","dull","car","duck","battle","accurate","build","because","case","consequence","coast","clever","drop","drink","camera","design","demand","adjust","common","awful","cell","address","cross","breath","detail","divorce","chocolate","democracy","back","correct","attempt","develop","brick","calm","culture","airplane","awkward","content","camp","ancient","beg","bold","boil","club","council","choose","cigarette","behind","dog","conversation","amount","benefit","certain","claim","absorb","accomplish","champion","doubt","cost","cut","account","committee","connect","draft","complex","block","company","contest","associate","courage","disappear","determine","adopt","bear","bet","change","declare","author","cover","bright","aware","device","bunch","data","desert","daily","degree","crime","cheap","decorate","chief","confirm","credit","aspect","chemical","announce","angle","draw","chin","age","daughter","behave","admit","begin","bowl","contain","compare","abstract","choice","break","abandon","coal","coin","article","buy","describe","diverse","comfort","borrow","alone","clean","attend","city","contrast","ability","dance","arrive","center","deep","dust","diary","curtain","deliver","although","abroad","combine","below","coach","check","cake","call","advance","conference","dictate","differ","arrange","already","add","aim","church","clear","apparent","crash","decision","capable","computer","cause","concentrate","bill","coffee","divide","bell","drive","depend","apply","charge","cool","candidate","citizen","cough","couple","communicate","ball","advantage","bitter","capital","branch","down","beautiful","admire","breakfast","discuss","command","duty","blame","dark","chat","district","dry","coat","assume","damage","conscious","advice","copy","criminal","distance","bit","court","balance","bullet","butter","ashamed","bus","convenient","chapter","dialog","desire","alive","donate","dig","bomb","beat","count","adapt","advertise","current","average","complain","bury","contact","contract","book","column","afraid","cabinet","anger","code","charity","database","acquire","bin","confuse","brother","burn","alarm","cable","double","dress","brilliant","delay","bank","arrest","direct","broad","download","cup","art","define","about","dinner","blood","concern","chance","bath","cash","drama","curious","corner","dad","award","commit","accept","conflict","class","become","base","air","accident","accompany","cat","conclude","agree","collect","due","create","allow","deal","appear","beach","believe","blind","debate","accelerate","also","convince"];
         const IRREGULAR_VERBS = [
             {v1:"be",v2:"was/were",v3:"been",t:"быть"},{v1:"become",v2:"became",v3:"become",t:"становиться"},
             {v1:"begin",v2:"began",v3:"begun",t:"начинать"},{v1:"break",v2:"broke",v3:"broken",t:"ломать"},
@@ -504,10 +521,12 @@ canvas {
         // ===== PRO =====
         function renderProPage(main) {
             main.innerHTML = `<div class="card">
-                <img src="pro.png" style="width:80px; image-rendering:pixelated;" alt="Pro">
-                <h2>⭐ Pro</h2>
-                <p>Сними лимиты и получи перевод!</p>
-                <p>Пиши: <a href="https://t.me/finpolq" style="color:inherit;">@finpolq</a></p>
+                <img src="pro.png" width="80" height="80" style="image-rendering:pixelated;" alt="Pro">
+                <h2>⭐ Englify Pro</h2>
+                <p>Всего <strong>1 звезда Telegram</strong> — навсегда!</p>
+                <p>Сними лимиты, открой перевод в English Mode.</p>
+                <p>Оплати в боте:</p>
+                <a href="https://t.me/engliFLY_bot" style="color:var(--text);text-decoration:underline;">@engliFLY_bot</a>
             </div>`;
         }
 

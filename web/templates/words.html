@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+    <h2>📚 Мой словарь</h2>
+    <ul id="wordList"></ul>
+    <p id="emptyMsg" style="display:none;">Пока нет выученных слов. Микки ждёт новых! 🐱</p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const learned = JSON.parse(localStorage.getItem('learnedWords') || '[]');
+    const list = document.getElementById('wordList');
+    
+    if (learned.length === 0) {
+        document.getElementById('emptyMsg').style.display = 'block';
+    } else {
+        learned.forEach(word => {
+            const li = document.createElement('li');
+            li.textContent = word;
+            list.appendChild(li);
+        });
+    }
+</script>
+{% endblock %}

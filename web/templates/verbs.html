@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+    <h2>🐾 Тренажёр глаголов</h2>
+    <p id="verbQuestion">Загрузка...</p>
+    <div class="options" id="verbOptions"></div>
+    <div id="verbMsg" class="mickey-hint"></div>
+    <div id="verbResult"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const verbs = {{ verbs | tojson }};
+    let currentVerb = 0;
+    let score = 0;
+
+    function loadVerb() {
+        if (currentVerb >= verbs.length) {
+            document.getElementById('verbQuestion').textContent = '🎉 Тренировка окончена!';
+            document.getElementById('verbOptions').innerHTML = '';
+            document.getElementById('verbResult').textContent = `Правильных: ${score}/${verbs.length}`;
+            return;
+        }
+        const verb = verbs[currentVerb];
+        document.getElementById('verbQuestion').textContent =
+            `Какая третья форма глагола «${verb.v1}» (${verb.translation})?\n${verb.v1} — ${verb.v2} — ???`;
+
+        const correctV3 = verb.v3;
+        const allV3 = verbs.map(v => v.v3).filter(v => v !== correctV3);
+        const choices = [correctV3, ...randomSample(allV3, 2)].sort(() => Math.random() - 0.5);
+
+        const container = document.getElementById('verbOptions');
+        container.innerHTML = '';
+        choices.forEach(choice => {
+            const btn = document.createElement('div');
+            btn.className = 'option-btn';
+            btn.textContent = choice;
+            btn.addEventListener('click', () => {
+                if (choice === correctV3) {
+                    score++;
+                    document.getElementById('verbMsg').textContent = '✅ Верно! Микки рад! 😸';
+                } else {
+                    document.getElementById('verbMsg').textContent = `❌ Неверно. Правильно: ${correctV3}`;
+                }
+                currentVerb++;
+                setTimeout(loadVerb, 1000);
+            });
+            container.appendChild(btn);
+        });
+    }
+
+    function randomSample(arr, n) {
+        const shuffled = arr.slice();
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled.slice(0, n);
+    }
+
+    loadVerb();
+</script>
+{% endblock %}

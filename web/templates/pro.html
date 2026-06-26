@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+    <img src="{{ url_for('static', filename='pro.png') }}" alt="Pro" class="pro-img" loading="lazy" width="100" height="100">
+    <h2>⭐ Englify Pro</h2>
+    <p>Сними лимиты, открой перевод в Full Immersion и получи эксклюзивные фичи!</p>
+    <p>Всего <strong>1 звезда Telegram</strong> — навсегда! 💫</p>
+    <p>Открой бота и оплати подписку в меню Pro:</p>
+    <a href="https://t.me/engliFLY_bot" target="_blank" class="telegram-link">
+        <img src="{{ url_for('static', filename='telegram-pixel.png') }}" alt="Telegram" class="telegram-icon" loading="lazy" width="24" height="24">
+        Перейти в бота
+    </a>
+</div>
+{% endblock %}

@@ -486,6 +486,10 @@ PRO_TEMPLATES = [
 SYNONYMS = {"abandon": "leave", "ability": "skill", "able": "capable", "about": "approximately", "above": "over", "abroad": "overseas", "absence": "lack", "absolute": "total", "absorb": "soak up", "abstract": "theoretical"}
 ANTONYMS = {"abandon": "keep", "ability": "inability", "able": "unable", "about": "exactly", "above": "below", "abroad": "local"}
 
+# Перемешиваем слова с фиксированным seed, чтобы порядок изменился, но оставался детерминированным
+_shuffler = random.Random(42)
+_shuffler.shuffle(WORDS_OF_DAY)
+
 def get_daily_word(day_index: int) -> dict:
     return WORDS_OF_DAY[day_index % len(WORDS_OF_DAY)]
 

@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Приветственное окно (шаг 1) -->
+<div id="welcomeModal" class="modal">
+    <div class="modal-content">
+        <img src="{{ url_for('static', filename='hi.webp') }}" alt="Hi Mickey" width="100" height="100">
+        <div class="modal-text">
+            <h3>Привет! Я Микки 🐱</h3>
+            <p id="typingText"></p>
+            <div class="btn-group" id="welcomeButtons" style="display:none;">
+                <button onclick="startTest()">📝 Пройти тест</button>
+                <button onclick="showLevelSelector()">⚡ Выбрать уровень</button>
+            </div>
+            <div id="levelSelector" style="display:none;">
+                <p>Выбери уровень:</p>
+                <button class="option-btn" onclick="setLevel('novice')">🟢 Новичок</button>
+                <button class="option-btn" onclick="setLevel('middle')">🟡 Мидл</button>
+                <button class="option-btn" onclick="setLevel('pro')">🔴 Профи</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Поздравительное окно (шаг 2) -->
+<div id="congratsModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeCongrats()">✖</span>
+        <img src="{{ url_for('static', filename='test.webp') }}" alt="Test completed" loading="lazy" width="100" height="100">
+        <div class="modal-text">
+            <h3>Отлично!</h3>
+            <p>Теперь ты готов учить английский с Микки!<br>
+               Тебя ждут 365 слов, ежедневные задания, тренажёр глаголов и словарь.<br>
+               Твой прогресс сохранится на этом устройстве.</p>
+            <p><strong>Сегодняшнее слово уже ждёт тебя на главной!</strong></p>
+        </div>
+    </div>
+</div>
+
+<!-- Основной контент -->
+<div class="card daily-card">
+    <h2>Слово дня</h2>
+    <div class="word">{{ word.word }}</div>
+    <div class="translation">{{ word.translation }}</div>
+    <div class="example">"{{ word.example }}"</div>
+    <div class="actions">
+        <button id="speakBtn">🔊</button>
+        <button id="learnBtn">✅ Выучил</button>
+    </div>
+    <div id="mickeyMsg" class="mickey-hint"></div>
+</div>
+
+<div class="progress-card card">
+    <h3>Твой прогресс</h3>
+    <div class="progress-bar-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <p id="progressText">0 / 365 слов</p>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const word = "{{ word.word }}";
+    const testQuestions = {{ test_questions | tojson }};
+    let testIndex = 0, testScore = 0;
+
+    // === ПРОГРЕСС ===
+    function updateProgress() {
+        const learned = JSON.parse(localStorage.getItem('learnedWords') || '[]');
+        const percent = Math.round((learned.length / 365) * 100);
+        document.getElementById('progressBar').style.width = percent + '%';
+        document.getElementById('progressText').textContent = learned.length + ' / 365 слов';
+    }
+
+    // === ОЗВУЧКА И СОХРАНЕНИЕ СЛОВА ===
+    document.getElementById('speakBtn').addEventListener('click', () => {
+        const utterance = new SpeechSynthesisUtterance(word);
+        utterance.lang = 'en-US';
+        speechSynthesis.speak(utterance);
+    });
+    document.getElementById('learnBtn').addEventListener('click', () => {
+        let learned = JSON.parse(localStorage.getItem('learnedWords') || '[]');
+        if (!learned.includes(word)) {
+            learned.push(word);
+            localStorage.setItem('learnedWords', JSON.stringify(learned));
+            document.getElementById('mickeyMsg').textContent = 'Мяу! Слово сохранено!';
+            updateProgress();
+        }
+    });
+
+    // === ПРИВЕТСТВЕННОЕ ОКНО С ЭФФЕКТОМ ПЕЧАТАНИЯ ===
+    const welcomeText = "Здесь ты можешь учить английский легко и весело! " +
+                        "Давай определим твой уровень — это поможет мне подобрать задания.";
+    const typingElement = document.getElementById('typingText');
+    const welcomeButtons = document.getElementById('welcomeButtons');
+    const levelSelector = document.getElementById('levelSelector');
+
+    let charIndex = 0;
+    function typeWriter() {
+        if (charIndex < welcomeText.length) {
+            typingElement.textContent += welcomeText.charAt(charIndex);
+            charIndex++;
+            setTimeout(typeWriter, 40); // скорость печатания
+        } else {
+            // Печатание закончено — показываем кнопки
+            typingElement.classList.remove('typing-effect');
+            welcomeButtons.style.display = 'flex';
+        }
+    }
+
+    function showWelcomeModal() {
+        document.getElementById('welcomeModal').classList.add('show');
+        typingElement.classList.add('typing-effect');
+        typeWriter();
+    }
+
+    function hideWelcomeModal() {
+        document.getElementById('welcomeModal').classList.remove('show');
+    }
+
+    // === ЗАПУСК ТЕСТА ===
+    function startTest() {
+        hideWelcomeModal();
+        testIndex = 0;
+        testScore = 0;
+        document.getElementById('testModal').classList.add('show');
+        displayTestQuestion();
+    }
+
+    // === ВЫБОР УРОВНЯ ВРУЧНУЮ (вместо теста) ===
+    function showLevelSelector() {
+        welcomeButtons.style.display = 'none';
+        levelSelector.style.display = 'block';
+    }
+
+    function setLevel(level) {
+        localStorage.setItem('engLevel', level);
+        hideWelcomeModal();
+        showCongratsModal();
+    }
+
+    // === ПОЗДРАВИТЕЛЬНОЕ ОКНО ===
+    function showCongratsModal() {
+        document.getElementById('congratsModal').classList.add('show');
+    }
+
+    function closeCongrats() {
+        document.getElementById('congratsModal').classList.remove('show');
+        localStorage.setItem('welcomeDone', 'true'); // больше не показываем приветствие
+        updateProgress();
+    }
+
+    // === ТЕСТ (модальное окно) ===
+    // Разметка теста (скрыта изначально) – добавим прямо в DOM
+    const testModal = document.createElement('div');
+    testModal.id = 'testModal';
+    testModal.className = 'modal';
+    testModal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-text" style="width:100%">
+                <h3>Тест на уровень</h3>
+                <p id="testQuestion"></p>
+                <div class="options" id="testOptions"></div>
+                <div id="testHint" class="mickey-hint"></div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(testModal);
+
+    function displayTestQuestion() {
+        if (testIndex >= testQuestions.length) {
+            finishTest();
+            return;
+        }
+        const q = testQuestions[testIndex];
+        document.getElementById('testQuestion').textContent = `Вопрос ${testIndex+1}/${testQuestions.length}: ${q.question}`;
+        const optionsContainer = document.getElementById('testOptions');
+        optionsContainer.innerHTML = '';
+        q.options.forEach((opt, i) => {
+            const btn = document.createElement('div');
+            btn.className = 'option-btn';
+            btn.textContent = opt;
+            btn.addEventListener('click', () => handleTestAnswer(i, q.correct));
+            optionsContainer.appendChild(btn);
+        });
+    }
+
+    function handleTestAnswer(chosen, correct) {
+        if (chosen === correct) testScore++;
+        testIndex++;
+        displayTestQuestion();
+    }
+
+    function finishTest() {
+        document.getElementById('testModal').classList.remove('show');
+        let level = 'novice';
+        if (testScore >= 12) level = 'pro';
+        else if (testScore >= 7) level = 'middle';
+        localStorage.setItem('engLevel', level);
+        showCongratsModal();
+    }
+
+    // === ИНИЦИАЛИЗАЦИЯ ===
+    if (!localStorage.getItem('welcomeDone')) {
+        showWelcomeModal();
+    } else {
+        updateProgress();
+    }
+
+    // на случай, если тест уже проходили, а приветствие нет (не должно случиться)
+    if (localStorage.getItem('engLevel') && !localStorage.getItem('welcomeDone')) {
+        // если уровень уже есть, можно сразу показать конгратс и закрыть приветствие
+        hideWelcomeModal();
+        showCongratsModal();
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card" id="taskCard">
+    <div class="stats">
+        <span id="livesDisplay">❤️❤️❤️</span>
+        <span id="streakDisplay">🔥 0 дней</span>
+    </div>
+    <h2>Задания (<span id="levelName">новичок</span>)</h2>
+    <p id="questionText">Загрузка...</p>
+    <div class="options" id="optionsContainer"></div>
+    <div id="mickeyMsg" class="mickey-hint"></div>
+    <div class="actions" id="navButtons" style="display:none;">
+        <button onclick="nextTask()">Продолжить</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Хранилище игрового состояния
+    let lives = 3, streak = 0, level = 'novice', currentTasks = [], taskIndex = 0;
+    const today = new Date().getDate();
+
+    if (localStorage.getItem('engLives')) lives = parseInt(localStorage.getItem('engLives'));
+    if (localStorage.getItem('engStreak')) streak = parseInt(localStorage.getItem('engStreak'));
+    if (localStorage.getItem('engLevel')) level = localStorage.getItem('engLevel');
+
+    document.getElementById('levelName').textContent = level === 'novice' ? 'новичок' : (level === 'middle' ? 'мидл' : 'профи');
+    updateStats();
+
+    async function fetchTasks() {
+        const resp = await fetch(`/api/tasks?level=${level}&day=${today}`);
+        currentTasks = await resp.json();
+        taskIndex = 0;
+        showTask();
+    }
+
+    function showTask() {
+        if (taskIndex >= currentTasks.length) {
+            document.getElementById('questionText').textContent = '🎉 Все задания на сегодня пройдены!';
+            document.getElementById('optionsContainer').innerHTML = '';
+            document.getElementById('navButtons').style.display = 'none';
+            return;
+        }
+        const task = currentTasks[taskIndex];
+        document.getElementById('questionText').textContent = task.question;
+        const container = document.getElementById('optionsContainer');
+        container.innerHTML = '';
+        task.options.forEach((opt, i) => {
+            const btn = document.createElement('div');
+            btn.className = 'option-btn';
+            btn.textContent = opt;
+            btn.addEventListener('click', () => checkAnswer(i, task.correct, btn));
+            container.appendChild(btn);
+        });
+        document.getElementById('navButtons').style.display = 'none';
+        document.getElementById('mickeyMsg').textContent = '';
+    }
+
+    function checkAnswer(chosen, correct, btn) {
+        const isCorrect = (chosen === correct);
+        if (isCorrect) {
+            btn.classList.add('correct');
+            streak++;
+            document.getElementById('mickeyMsg').textContent = 'Микки гордится тобой! 😸';
+        } else {
+            btn.classList.add('wrong');
+            lives--;
+            document.getElementById('mickeyMsg').textContent = 'Микки расстроен, но мы попробуем ещё раз 😿';
+        }
+        localStorage.setItem('engLives', lives);
+        localStorage.setItem('engStreak', streak);
+        updateStats();
+        document.querySelectorAll('.option-btn').forEach(b => b.style.pointerEvents = 'none');
+        document.getElementById('navButtons').style.display = 'flex';
+    }
+
+    function nextTask() {
+        if (lives <= 0) {
+            alert('У тебя кончились жизни! Приходи завтра.');
+            return;
+        }
+        taskIndex++;
+        document.querySelectorAll('.option-btn').forEach(b => b.style.pointerEvents = 'auto');
+        showTask();
+    }
+
+    function updateStats() {
+        document.getElementById('livesDisplay').textContent = '❤️'.repeat(lives) + '🖤'.repeat(3-lives);
+        document.getElementById('streakDisplay').textContent = `🔥 ${streak} дней`;
+    }
+
+    fetchTasks();
+</script>
+{% endblock %}

@@ -6,8 +6,8 @@ import random
 from datetime import datetime, date
 import pytz
 from dotenv import load_dotenv
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, LabeledPrice
+from telegram.ext import Application, CommandHandler, CallbackQueryHandler, PreCheckoutQueryHandler, MessageHandler, filters, ContextTypes
 from content import get_daily_word, generate_tasks
 from test_data import TEST_QUESTIONS
 from irregular_verbs import IRREGULAR_VERBS
@@ -316,11 +316,23 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                                       reply_markup=main_menu_keyboard(new_lang))
     elif data == "menu_pro":
         text = _(
-            "⭐ Pro-подписка снимает лимит заданий и включает перевод в English Mode.\nДля покупки напиши менеджеру @finpolq.",
-            "⭐ Pro removes daily task limit and enables translation in English Mode.\nContact @finpolq to purchase.",
+            "⭐ Pro — всего 1 звезда Telegram навсегда!\nСнимает лимит заданий и включает перевод в English Mode.",
+            "⭐ Pro — just 1 Telegram Star forever!\nRemoves daily task limit and enables translation in English Mode.",
             lang
         )
-        await query.edit_message_text(text, reply_markup=main_menu_keyboard(lang))
+        keyboard = [
+            [InlineKeyboardButton(_("💳 Купить Pro за ⭐1", "💳 Buy Pro for ⭐1", lang), callback_data="buy_pro")],
+            [InlineKeyboardButton(_("⬅ Назад", "⬅ Back", lang), callback_data="back_main")]
+        ]
+        await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
+    elif data == "buy_pro":
+        await send_pro_invoice(query, uid, lang, context)
+    elif data == "back_main":
+        await query.edit_message_text(
+            _("Выбери действие:", "Choose an option:", lang),
+            reply_markup=main_menu_keyboard(lang)
+        )
+
     elif data.startswith("learned_"):
         word = data[8:]
         add_learned_word(uid, word)
@@ -418,6 +430,55 @@ async def show_task(query, task, lang, uid, prefix=""):
         buttons.append([InlineKeyboardButton("🔍 Translate", callback_data="translate_task")])
     await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(buttons))
 
+async def send_pro_invoice(query, uid, lang, context):
+    if query:
+        await query.edit_message_text(
+            _("🧾 Отправляю счёт…", "🧾 Sending invoice…", lang)
+        )
+    else:
+        await context.bot.send_message(
+            uid,
+            _("🧾 Отправляю счёт…", "🧾 Sending invoice…", lang)
+        )
+    await context.bot.send_invoice(
+        chat_id=uid,
+        title=_("Englify Pro", "Englify Pro", lang),
+        description=_(
+            "Доступ к Pro-функциям навсегда:\n"
+            "• Безлимитные задания\n"
+            "• Перевод в English Mode\n"
+            "• Эксклюзивные фичи",
+            "Lifetime Pro access:\n"
+            "• Unlimited tasks\n"
+            "• Translation in English Mode\n"
+            "• Exclusive features",
+            lang
+        ),
+        payload="pro_subscription",
+        provider_token="",
+        currency="XTR",
+        prices=[LabeledPrice(label=_("Подписка Pro", "Pro Subscription", lang), amount=1)]
+    )
+
+async def pre_checkout(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.pre_checkout_query
+    await query.answer(ok=True)
+
+async def successful_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    uid = update.effective_user.id
+    update_user(uid, is_pro=1)
+    lang = get_user(uid)["language"]
+    await update.message.reply_text(
+        _(
+            "🎉 Спасибо! Pro активирован навсегда!\n"
+            "Теперь у тебя безлимитные задания и перевод в English Mode.",
+            "🎉 Thank you! Pro activated forever!\n"
+            "Now you have unlimited tasks and English Mode translation.",
+            lang
+        ),
+        reply_markup=main_menu_keyboard(lang)
+    )
+
 async def add_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id not in ADMIN_IDS:
         return
@@ -459,6 +520,15 @@ if __name__ == "__main__":
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("addpro", add_pro))
+
+    async def pay_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        uid = update.effective_user.id
+        user = get_user(uid)
+        await send_pro_invoice(None, uid, user["language"], context)
+
+    app.add_handler(CommandHandler("pay", pay_command))
+    app.add_handler(PreCheckoutQueryHandler(pre_checkout))
+    app.add_handler(MessageHandler(filters.SUCCESSFUL_PAYMENT, successful_payment))
     app.add_handler(CallbackQueryHandler(button_handler))
 
     # /word без лишнего сообщения

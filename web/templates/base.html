@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Englify – учи английский с Микки каждый день</title>
+    <meta name="description" content="Englify — учи английский язык бесплатно с Микки. Слово дня, ежедневные задания, грамматика, тренажёр глаголов и словарь.">
+    <meta name="keywords" content="английский язык, учить английский онлайн, englify, слово дня, грамматика английского, irregular verbs, изучение английского">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="Russian">
+    <meta property="og:title" content="Englify – учи английский с Микки">
+    <meta property="og:description" content="Ежедневные слова, задания, грамматика и тренажёры для изучения английского языка бесплатно.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://englify.ru">
+    <meta property="og:image" content="{{ url_for('static', filename='logo.png', _external=True) }}">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Englify – учи английский с Микки">
+    <meta name="twitter:description" content="Изучай английский каждый день с Микки! Слово дня, задания, грамматика.">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='logo.png') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Englify",
+        "description": "Изучение английского языка с Микки",
+        "url": "https://englify.ru",
+        "inLanguage": "ru"
+    }
+    </script>
+</head>
+<body class="theme-day">
+    <!-- Облака (двигаются на фоне) -->
+    <div class="clouds">
+        <div class="cloud cloud1"></div>
+        <div class="cloud cloud2"></div>
+        <div class="cloud cloud3"></div>
+    </div>
+
+    <!-- Шапка -->
+    <header>
+        <a href="/" class="logo-link">
+            <img id="logoImg" src="{{ url_for('static', filename='logo.PNG') }}" alt="Englify" class="logo-img" width="80" height="80">
+        </a>
+
+        <!-- Десктопное меню -->
+        <nav id="desktopNav">
+            <a href="/">🏠 Слово дня</a>
+            <a href="/tasks">📝 Задания</a>
+            <a href="/verbs">🐾 Глаголы</a>
+            <a href="/grammar">📘 Грамматика</a>
+            <a href="/words">📚 Словарь</a>
+            <a href="/pro">⭐ Pro</a>
+        </nav>
+
+        <!-- Кнопка переключения темы -->
+        <button id="themeToggle" class="theme-toggle-btn" onclick="toggleTheme()">
+            <img id="themeIcon" src="{{ url_for('static', filename='daymod.png') }}" alt="Тема" class="theme-icon">
+        </button>
+
+        <!-- Бургер-кнопка -->
+        <button class="burger-btn" id="burgerBtn" onclick="toggleMenu()" aria-label="Меню">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <!-- Мобильное меню -->
+        <div class="mobile-nav" id="mobileNav">
+            <a href="/">🏠 Слово дня</a>
+            <a href="/tasks">📝 Задания</a>
+            <a href="/verbs">🐾 Глаголы</a>
+            <a href="/grammar">📘 Грамматика</a>
+            <a href="/words">📚 Словарь</a>
+            <a href="/pro">⭐ Pro</a>
+        </div>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>Микки всегда рядом 🐱</p>
+        <a href="https://t.me/engliFLY_bot" target="_blank" class="telegram-link">
+            <img src="{{ url_for('static', filename='telegram-pixel.png') }}" alt="Telegram" class="telegram-icon" loading="lazy" width="24" height="24">
+            Открыть бота в Telegram
+        </a>
+    </footer>
+
+    {% block scripts %}{% endblock %}
+
+    <script>
+        const mobileNav = document.getElementById('mobileNav');
+        const burgerBtn = document.getElementById('burgerBtn');
+
+        function toggleMenu() {
+            if (mobileNav.classList.contains('active')) {
+                closeMenu();
+            } else {
+                openMenu();
+            }
+        }
+
+        function openMenu() {
+            mobileNav.classList.add('active');
+            burgerBtn.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMenu() {
+            mobileNav.classList.remove('active');
+            burgerBtn.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        document.querySelectorAll('.mobile-nav a').forEach(link => {
+            link.addEventListener('click', closeMenu);
+        });
+
+        let touchStartX = 0;
+        mobileNav.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+        }, {passive: true});
+
+        mobileNav.addEventListener('touchmove', (e) => {
+            const diff = e.touches[0].clientX - touchStartX;
+            if (diff > 50) closeMenu();
+        }, {passive: true});
+
+        // === ПЕРЕКЛЮЧЕНИЕ ТЕМЫ ===
+        const body = document.body;
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const logoImg = document.getElementById('logoImg');
+
+        function setTheme(theme) {
+            if (theme === 'night') {
+                body.classList.remove('theme-day');
+                body.classList.add('theme-night');
+                themeIcon.src = "{{ url_for('static', filename='nightmod.png') }}";
+                logoImg.src = "{{ url_for('static', filename='nlogo.png') }}";
+                localStorage.setItem('engTheme', 'night');
+            } else {
+                body.classList.remove('theme-night');
+                body.classList.add('theme-day');
+                themeIcon.src = "{{ url_for('static', filename='daymod.png') }}";
+                logoImg.src = "{{ url_for('static', filename='logo.PNG') }}";
+                localStorage.setItem('engTheme', 'day');
+            }
+        }
+
+        function toggleTheme() {
+            if (body.classList.contains('theme-night')) {
+                setTheme('day');
+            } else {
+                setTheme('night');
+            }
+        }
+
+        // Загружаем сохранённую тему
+        const savedTheme = localStorage.getItem('engTheme');
+        if (savedTheme === 'night') {
+            setTheme('night');
+        }
+    </script>
+</body>
+</html>
