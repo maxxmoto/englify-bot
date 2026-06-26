@@ -71,42 +71,50 @@
     }
 
     async function submitEge() {
-        // Collect all answers
-        const allAnswers = [];
-        for (let i = 0; i < totalQ; i++) {
-            const inp = document.getElementById(`ege_inp_${i}`);
-            const radios = document.querySelectorAll(`input[name="tf_${i}"]:checked, input[name="mc_${i}"]:checked`);
-            if (inp) {
-                allAnswers.push(parseInt(inp.value) || 0);
-            } else if (radios.length) {
-                allAnswers.push(parseInt(radios[0].value));
-            } else {
-                allAnswers.push(0);
+        try {
+            const allAnswers = [];
+            for (let i = 0; i < totalQ; i++) {
+                const inp = document.getElementById('ege_inp_' + i);
+                const mcRadio = document.querySelector('input[name="mc_' + i + '"]:checked');
+                const tfRadio = document.querySelector('input[name="tf_' + i + '"]:checked');
+                if (inp) {
+                    allAnswers.push(parseInt(inp.value) || 0);
+                } else if (mcRadio) {
+                    allAnswers.push(parseInt(mcRadio.value));
+                } else if (tfRadio) {
+                    allAnswers.push(parseInt(tfRadio.value));
+                } else {
+                    allAnswers.push(0);
+                }
             }
-        }
 
-        const resp = await fetch('/api/ege_check', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({task_id: task.id, answers: allAnswers})
-        });
-        const data = await resp.json();
-        
-        document.getElementById('egeContent').style.display = 'none';
-        document.getElementById('egeActions').style.display = 'none';
-        const resultDiv = document.getElementById('egeResult');
-        resultDiv.style.display = 'block';
-        
-        let html = `<h3>✅ Результат: ${data.correct}/${data.total}</h3>`;
-        data.results.forEach((r, i) => {
-            const icon = r ? '✅' : '❌';
-            const correctAns = task.format === 'matching' ? task.correct[i] : 
-                              task.format === 'true_false' ? task.correct[i] :
-                              task.questions[i]?.correct !== undefined ? task.questions[i].correct + 1 : '?';
-            html += `<p style="font-size:9px;">${icon} Вопрос ${i+1}: ${r ? 'Верно' : 'Ошибка (правильно: ' + correctAns + ')'}</p>`;
-        });
-        html += `<button onclick="location.href='/ege'" style="margin-top:15px;">← К заданиям</button>`;
-        resultDiv.innerHTML = html;
+            const resp = await fetch('/api/ege_check', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({task_id: task.id, answers: allAnswers})
+            });
+            const data = await resp.json();
+            
+            document.getElementById('egeContent').style.display = 'none';
+            document.getElementById('egeActions').style.display = 'none';
+            const resultDiv = document.getElementById('egeResult');
+            resultDiv.style.display = 'block';
+            
+            let html = '<h3>✅ Результат: ' + data.correct + '/' + data.total + '</h3>';
+            data.results.forEach(function(r, i) {
+                var ca;
+                if (task.format === 'multiple_choice' && task.questions[i]) {
+                    ca = task.questions[i].correct + 1;
+                } else {
+                    ca = task.correct[i];
+                }
+                html += '<p style="font-size:9px;">' + (r ? '✅' : '❌') + ' Вопрос ' + (i+1) + ': ' + (r ? 'Верно' : 'Ошибка (правильно: ' + ca + ')') + '</p>';
+            });
+            html += '<button onclick="location.href=\'/ege\'" style="margin-top:15px;">← К заданиям</button>';
+            resultDiv.innerHTML = html;
+        } catch(e) {
+            alert('Ошибка: ' + e.message);
+        }
     }
 
     render();
