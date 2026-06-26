@@ -107,6 +107,26 @@ def get_stats(user_id):
     conn.close()
     return total or 0, correct or 0
 
+def get_all_users_stats():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT COUNT(*) FROM users")
+    total_users = c.fetchone()[0]
+    c.execute("SELECT COUNT(*) FROM users WHERE is_pro = 1")
+    pro_users = c.fetchone()[0]
+    c.execute("SELECT COUNT(*) FROM learned_words")
+    total_words = c.fetchone()[0]
+    c.execute("SELECT COUNT(*) FROM completed_tasks")
+    total_tasks = c.fetchone()[0]
+    c.execute("SELECT COUNT(DISTINCT user_id) FROM completed_tasks")
+    active_users = c.fetchone()[0]
+    c.execute("SELECT user_id, language FROM users ORDER BY user_id DESC LIMIT 10")
+    recent = c.fetchall()
+    conn.close()
+    return {"total_users": total_users, "pro_users": pro_users,
+            "total_words": total_words, "total_tasks": total_tasks,
+            "active_users": active_users, "recent_users": recent}
+
 # ---------- ПЕРЕВОДЫ ----------
 def _(text_ru, text_en, lang):
     return text_en if lang == 'en' else text_ru
@@ -481,8 +501,11 @@ async def successful_payment(update: Update, context: ContextTypes.DEFAULT_TYPE)
         reply_markup=main_menu_keyboard(lang)
     )
 
+def is_admin(update):
+    return update.effective_user.id in ADMIN_IDS
+
 async def add_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.effective_user.id not in ADMIN_IDS:
+    if not is_admin(update):
         return
     try:
         target_id = int(context.args[0])
@@ -490,6 +513,55 @@ async def add_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"Пользователь {target_id} теперь Pro.")
     except:
         await update.message.reply_text("Использование: /addpro user_id")
+
+async def remove_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not is_admin(update):
+        return
+    try:
+        target_id = int(context.args[0])
+        update_user(target_id, is_pro=0)
+        await update.message.reply_text(f"У пользователя {target_id} отключён Pro.")
+    except:
+        await update.message.reply_text("Использование: /removepro user_id")
+
+async def admin_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not is_admin(update):
+        return
+    s = get_all_users_stats()
+    text = (
+        f"📊 **Статистика бота**\n\n"
+        f"👤 Всего пользователей: {s['total_users']}\n"
+        f"⭐ Pro пользователей: {s['pro_users']}\n"
+        f"📝 Активных (задания): {s['active_users']}\n"
+        f"📚 Выучено слов: {s['total_words']}\n"
+        f"✅ Выполнено заданий: {s['total_tasks']}\n\n"
+        f"**Последние 10 пользователей:**\n"
+    )
+    for uid, lang in s['recent_users']:
+        text += f"• `{uid}` ({lang})\n"
+    await update.message.reply_text(text)
+
+async def broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not is_admin(update):
+        return
+    if not context.args:
+        await update.message.reply_text("Использование: /broadcast <текст>")
+        return
+    message = " ".join(context.args)
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT user_id FROM users")
+    users = c.fetchall()
+    conn.close()
+    sent = 0
+    failed = 0
+    for (uid,) in users:
+        try:
+            await context.bot.send_message(uid, f"📢 **Объявление:**\n\n{message}")
+            sent += 1
+        except:
+            failed += 1
+    await update.message.reply_text(f"Рассылка завершена.\n✅ Доставлено: {sent}\n❌ Ошибок: {failed}")
 
 
 
@@ -524,6 +596,9 @@ if __name__ == "__main__":
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("addpro", add_pro))
+    app.add_handler(CommandHandler("removepro", remove_pro))
+    app.add_handler(CommandHandler("stats", admin_stats))
+    app.add_handler(CommandHandler("broadcast", broadcast))
 
     async def pay_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         uid = update.effective_user.id
