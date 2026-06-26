@@ -27,11 +27,15 @@
         const fmt = task.format;
 
         if (fmt === 'matching') {
-            let html = '<p><strong>Подберите заголовки к текстам:</strong></p>';
-            task.headings.forEach((h, i) => {
+            let html = '<p><strong>Подберите заголовки к текстам A-F:</strong></p>';
+            html += '<div style="margin:10px 0;padding:10px;background:var(--accent);border:2px solid var(--border);"><p style="font-size:8px;"><strong>Заголовки:</strong></p>';
+            task.headings.forEach((h, i) => { html += `<p style="font-size:8px;">${i+1}. ${h}</p>`; });
+            html += '</div>';
+            task.texts.forEach((t, i) => {
+                const val = answers[i] || '';
                 html += `<div style="border:2px solid var(--border);padding:10px;margin:8px 0;background:var(--card-bg);">
-                    <p style="font-size:9px;">${i+1}. ${h}</p>
-                    <p style="font-size:8px;color:#888;">Номер заголовка: <input type="number" min="1" max="7" data-idx="${i}" class="ege-input" style="width:60px;padding:5px;font-family:inherit;font-size:9px;" value="${answers[i] || ''}"></p>
+                    <p style="font-size:9px;"><strong>${t.split('.')[0]}.</strong> ${t.split('.').slice(1).join('.')}</p>
+                    <p style="font-size:8px;color:#888;">Заголовок №: <input type="number" min="1" max="7" id="ege_inp_${i}" style="width:60px;padding:5px;font-family:inherit;font-size:9px;" value="${val}"></p>
                 </div>`;
             });
             container.innerHTML = html;

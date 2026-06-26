@@ -483,12 +483,15 @@ async def show_ege_question(query, context, task, q_idx, lang, uid):
         return
 
     if fmt == 'matching':
-        heading = task['headings'][q_idx]
         text = _(
-            f"**{task['theme']}**\nЗадание 1. Подберите заголовок\n\n{heading}\n\nКакой буквой (1-7) обозначен этот заголовок?",
-            f"**{task['theme']}**\nTask 1. Match the heading\n\n{heading}\n\nWhat number (1-7) is this heading?", lang
+            f"**{task['theme']}**\nЗадание 1. Установите соответствие\n\n"
+            f"**Текст {task['texts'][q_idx]}**\n\n"
+            f"Какой заголовок подходит?",
+            f"**{task['theme']}**\nTask 1. Match the texts\n\n"
+            f"**{task['texts'][q_idx]}**\n\n"
+            f"Which heading fits?", lang
         )
-        buttons = [[InlineKeyboardButton(str(i), callback_data=f"ege_ans_{task['id']}_{q_idx}_{i}")] for i in range(1, 8)]
+        buttons = [[InlineKeyboardButton(f"{i}. {task['headings'][i-1][:50]}", callback_data=f"ege_ans_{task['id']}_{q_idx}_{i}")] for i in range(1, 8)]
 
     elif fmt == 'true_false':
         stmt = task['statements'][q_idx]
