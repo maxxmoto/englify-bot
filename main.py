@@ -467,7 +467,7 @@ async def ask_verb_question(query, context, lang, prefix=""):
 
 async def show_ege_question(query, context, task, q_idx, lang, uid):
     fmt = task['format']
-    total = len(task.get('headings', [])) if fmt == 'matching' else len(task.get('statements', [])) if fmt == 'true_false' else len(task.get('questions', []))
+    total = len(task.get('texts', [])) if fmt == 'matching' else len(task.get('statements', [])) if fmt == 'true_false' else len(task.get('questions', []))
 
     if q_idx >= total:
         # Show results

@@ -18,7 +18,7 @@
     const task = {{ task | tojson }};
     let answers = {};
     let currentQ = 0;
-    const totalQ = task.format === 'matching' ? task.headings.length : 
+    const totalQ = task.format === 'matching' ? task.texts.length : 
                    task.format === 'true_false' ? task.statements.length : 
                    task.questions.length;
 
@@ -74,10 +74,10 @@
         // Collect all answers
         const allAnswers = [];
         for (let i = 0; i < totalQ; i++) {
-            const inputs = document.querySelectorAll(`.eige-input[data-idx="${i}"]`);
+            const inp = document.getElementById(`ege_inp_${i}`);
             const radios = document.querySelectorAll(`input[name="tf_${i}"]:checked, input[name="mc_${i}"]:checked`);
-            if (inputs.length) {
-                allAnswers.push(parseInt(inputs[0].value) || 0);
+            if (inp) {
+                allAnswers.push(parseInt(inp.value) || 0);
             } else if (radios.length) {
                 allAnswers.push(parseInt(radios[0].value));
             } else {
