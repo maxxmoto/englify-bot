@@ -10,6 +10,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, Labeled
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, PreCheckoutQueryHandler, MessageHandler, filters, ContextTypes
 from content import generate_tasks
 from db_data import get_word, get_verbs, get_all_verbs, get_test_questions, init_tables, populate_if_empty
+from ege import get_all_ege_tasks, get_ege_task, check_ege_answer
 from gtts import gTTS
 import io
 
@@ -134,14 +135,15 @@ def _(text_ru, text_en, lang):
 def main_menu_keyboard(lang):
     labels = {
         'ru': {"tasks": "📝 Задания", "verbs": "🐾 Глаголы", "words": "📚 Мои слова",
-               "level": "🎚 Уровень", "mode": "🌐 Режим", "pro": "⭐ Pro"},
+               "level": "🎚 Уровень", "mode": "🌐 Режим", "pro": "⭐ Pro", "ege": "🎯 ЕГЭ"},
         'en': {"tasks": "📝 Tasks", "verbs": "🐾 Verbs", "words": "📚 My words",
-               "level": "🎚 Level", "mode": "🌐 Mode", "pro": "⭐ Pro"}
+               "level": "🎚 Level", "mode": "🌐 Mode", "pro": "⭐ Pro", "ege": "🎯 USE"}
     }
     l = labels[lang]
     keyboard = [
         [InlineKeyboardButton(l["tasks"], callback_data="menu_tasks")],
         [InlineKeyboardButton(l["verbs"], callback_data="menu_verbs")],
+        [InlineKeyboardButton(l["ege"], callback_data="menu_ege")],
         [InlineKeyboardButton(l["words"], callback_data="menu_words")],
         [InlineKeyboardButton(l["level"], callback_data="menu_level"),
          InlineKeyboardButton(l["mode"], callback_data="menu_mode")],
@@ -373,6 +375,35 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             hint = "Нет задания"
         await query.answer(hint, show_alert=True)
 
+    # ---------- ЕГЭ ----------
+    elif data == "menu_ege":
+        tasks = get_all_ege_tasks()
+        buttons = []
+        for t in tasks:
+            label = f"Задание {t['type']}: {t['theme']}"
+            buttons.append([InlineKeyboardButton(label, callback_data=f"ege_{t['id']}_0")])
+        buttons.append([InlineKeyboardButton(_("⬅ Назад", "⬅ Back", lang), callback_data="back_main")])
+        await query.edit_message_text(
+            _("🎯 **ЕГЭ-тренажёр**\nВыбери задание:", "🎯 **USE Trainer**\nChoose a task:", lang),
+            reply_markup=InlineKeyboardMarkup(buttons)
+        )
+    elif data.startswith("ege_ans_"):
+        parts = data.split("_")
+        task_id = int(parts[2])
+        q_idx = int(parts[3])
+        answer = int(parts[4])
+        await handle_ege_answer(query, context, task_id, q_idx, answer, lang)
+    elif data.startswith("ege_"):
+        parts = data.split("_")
+        if len(parts) >= 3:
+            task_id = int(parts[1])
+            q_idx = int(parts[2])
+            task = get_ege_task(task_id)
+            if not task:
+                await query.edit_message_text("❌ Задание не найдено", reply_markup=main_menu_keyboard(lang))
+                return
+            await show_ege_question(query, context, task, q_idx, lang, uid)
+
     # ---------- ТРЕНАЖЁР ГЛАГОЛОВ ----------
     elif data == "menu_verbs":
         context.user_data["verb_score"] = 0
@@ -433,6 +464,68 @@ async def ask_verb_question(query, context, lang, prefix=""):
     )
     buttons = [[InlineKeyboardButton(opt, callback_data=f"verb_{i}")] for i, opt in enumerate(options)]
     await query.edit_message_text(prefix + question_text, reply_markup=InlineKeyboardMarkup(buttons))
+
+async def show_ege_question(query, context, task, q_idx, lang, uid):
+    fmt = task['format']
+    total = len(task.get('headings', [])) if fmt == 'matching' else len(task.get('statements', [])) if fmt == 'true_false' else len(task.get('questions', []))
+
+    if q_idx >= total:
+        # Show results
+        saved = context.user_data.get(f"ege_answers_{task['id']}", [])
+        correct_count, total_count, results = check_ege_answer(task, saved)
+        text = _(
+            f"🎯 **{task['theme']}** — завершено!\n\n✅ Правильно: {correct_count}/{total_count}",
+            f"🎯 **{task['theme']}** — finished!\n\n✅ Correct: {correct_count}/{total_count}", lang
+        )
+        if fmt == 'true_false':
+            text += _("\n(1=True, 2=False, 3=Not stated)", "\n(1=True, 2=False, 3=Not stated)", lang)
+        await query.edit_message_text(text, reply_markup=main_menu_keyboard(lang))
+        return
+
+    if fmt == 'matching':
+        heading = task['headings'][q_idx]
+        text = _(
+            f"**{task['theme']}**\nЗадание 1. Подберите заголовок\n\n{heading}\n\nКакой буквой (1-7) обозначен этот заголовок?",
+            f"**{task['theme']}**\nTask 1. Match the heading\n\n{heading}\n\nWhat number (1-7) is this heading?", lang
+        )
+        buttons = [[InlineKeyboardButton(str(i), callback_data=f"ege_ans_{task['id']}_{q_idx}_{i}")] for i in range(1, 8)]
+
+    elif fmt == 'true_false':
+        stmt = task['statements'][q_idx]
+        text = _(
+            f"**{task['theme']}**\nУтверждение {q_idx+1}/{total}\n\n{stmt}\n\n1 — True | 2 — False | 3 — Not stated",
+            f"**{task['theme']}**\nStatement {q_idx+1}/{total}\n\n{stmt}\n\n1 — True | 2 — False | 3 — Not stated", lang
+        )
+        buttons = [
+            [InlineKeyboardButton("1 ✅ True", callback_data=f"ege_ans_{task['id']}_{q_idx}_1"),
+             InlineKeyboardButton("2 ❌ False", callback_data=f"ege_ans_{task['id']}_{q_idx}_2"),
+             InlineKeyboardButton("3 ❓ Not stated", callback_data=f"ege_ans_{task['id']}_{q_idx}_3")]
+        ]
+
+    elif fmt == 'multiple_choice':
+        q = task['questions'][q_idx]
+        text = _(
+            f"**{task['theme']}**\nВопрос {q['num']}\n\n{q['text']}",
+            f"**{task['theme']}**\nQuestion {q['num']}\n\n{q['text']}", lang
+        )
+        buttons = [[InlineKeyboardButton(opt[:60], callback_data=f"ege_ans_{task['id']}_{q_idx}_{i}")] for i, opt in enumerate(q['options'])]
+
+    await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(buttons))
+
+async def handle_ege_answer(query, context, task_id, q_idx, answer, lang):
+    uid = query.from_user.id
+    key = f"ege_answers_{task_id}"
+    if key not in context.user_data:
+        context.user_data[key] = []
+    answers = context.user_data[key]
+    while len(answers) <= q_idx:
+        answers.append(None)
+    answers[q_idx] = answer
+
+    task = get_ege_task(task_id)
+    if not task:
+        return
+    await show_ege_question(query, context, task, q_idx + 1, lang, uid)
 
 async def send_test_question(query, context, uid, lang):
     questions = context.user_data.get("test_questions", get_test_questions())

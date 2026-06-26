@@ -2,6 +2,7 @@ import sys
 import os
 from flask import Flask, render_template, jsonify, request, redirect, url_for
 from db_data import get_word, get_verbs, get_test_questions, get_grammar_levels, init_tables, populate_if_empty
+from ege import get_all_ege_tasks, get_ege_task, check_ege_answer
 
 # Подтягиваем модули из папки бота
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
@@ -71,6 +72,28 @@ def test_page():
 @app.route('/pro')
 def pro_page():
     return render_template('pro.html')
+
+@app.route('/ege')
+def ege_page():
+    tasks = get_all_ege_tasks()
+    return render_template('ege.html', tasks=tasks)
+
+@app.route('/ege/<int:task_id>')
+def ege_task_page(task_id):
+    task = get_ege_task(task_id)
+    if not task:
+        return redirect(url_for('ege_page'))
+    return render_template('ege_task.html', task=task)
+
+@app.route('/api/ege_check', methods=['POST'])
+def ege_check():
+    data = request.get_json()
+    task = get_ege_task(data.get('task_id'))
+    if not task:
+        return jsonify({'error': 'Task not found'}), 404
+    answers = data.get('answers', [])
+    correct, total, results = check_ege_answer(task, answers)
+    return jsonify({'correct': correct, 'total': total, 'results': results})
 
 @app.route('/grammar')
 def grammar_levels():

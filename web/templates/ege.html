@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+    <h2>🎯 ЕГЭ-тренажёр</h2>
+    <p>Тренируйся выполнять задания из ЕГЭ по английскому языку</p>
+</div>
+{% for task in tasks %}
+<div class="card" style="cursor:pointer;" onclick="location.href='/ege/{{ task.id }}'">
+    <h3>Задание {{ task.type }}</h3>
+    <p>{{ task.theme }}</p>
+    <p style="font-size:8px;color:#888;">
+        {% if task.format == 'matching' %}Соответствие заголовков
+        {% elif task.format == 'true_false' %}True/False/Not stated
+        {% elif task.format == 'multiple_choice' %}Множественный выбор
+        {% endif %}
+    </p>
+    <button style="margin-top:10px;">Начать →</button>
+</div>
+{% endfor %}
+{% endblock %}

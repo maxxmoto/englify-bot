@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card" id="egeCard">
+    <h2>🎯 Задание {{ task.type }}: {{ task.theme }}</h2>
+    <p style="font-size:8px;color:#666;">{{ task.instruction }}</p>
+    <hr style="border:1px solid var(--border);margin:15px 0;">
+    <div id="egeContent"></div>
+    <div id="egeResult" style="display:none;"></div>
+    <div class="actions" id="egeActions" style="display:none;">
+        <button onclick="submitEge()">✅ Проверить</button>
+        <button onclick="location.href='/ege'">← Назад</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const task = {{ task | tojson }};
+    let answers = {};
+    let currentQ = 0;
+    const totalQ = task.format === 'matching' ? task.headings.length : 
+                   task.format === 'true_false' ? task.statements.length : 
+                   task.questions.length;
+
+    function render() {
+        const container = document.getElementById('egeContent');
+        const fmt = task.format;
+
+        if (fmt === 'matching') {
+            let html = '<p><strong>Подберите заголовки к текстам:</strong></p>';
+            task.headings.forEach((h, i) => {
+                html += `<div style="border:2px solid var(--border);padding:10px;margin:8px 0;background:var(--card-bg);">
+                    <p style="font-size:9px;">${i+1}. ${h}</p>
+                    <p style="font-size:8px;color:#888;">Номер заголовка: <input type="number" min="1" max="7" data-idx="${i}" class="ege-input" style="width:60px;padding:5px;font-family:inherit;font-size:9px;" value="${answers[i] || ''}"></p>
+                </div>`;
+            });
+            container.innerHTML = html;
+        } else if (fmt === 'true_false') {
+            let html = '<p><strong>Определите True/False/Not stated:</strong></p>';
+            task.statements.forEach((s, i) => {
+                const val = answers[i] || '';
+                html += `<div style="border:2px solid var(--border);padding:10px;margin:8px 0;background:var(--card-bg);">
+                    <p style="font-size:9px;">${i+1}. ${s}</p>
+                    <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+                        <label style="font-size:9px;"><input type="radio" name="tf_${i}" value="1" ${val==1?'checked':''} onchange="answers[${i}]=1"> True</label>
+                        <label style="font-size:9px;"><input type="radio" name="tf_${i}" value="2" ${val==2?'checked':''} onchange="answers[${i}]=2"> False</label>
+                        <label style="font-size:9px;"><input type="radio" name="tf_${i}" value="3" ${val==3?'checked':''} onchange="answers[${i}]=3"> Not stated</label>
+                    </div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        } else if (fmt === 'multiple_choice') {
+            let html = '<p><strong>Выберите правильный ответ:</strong></p>';
+            task.questions.forEach((q, i) => {
+                const val = answers[i];
+                html += `<div style="border:2px solid var(--border);padding:10px;margin:8px 0;background:var(--card-bg);">
+                    <p style="font-size:9px;"><strong>${q.num}.</strong> ${q.text}</p>`;
+                q.options.forEach((opt, oi) => {
+                    const checked = val === oi ? 'checked' : '';
+                    html += `<label style="display:block;font-size:9px;padding:5px 0;"><input type="radio" name="mc_${i}" value="${oi}" ${checked} onchange="answers[${i}]=${oi}"> ${opt}</label>`;
+                });
+                html += `</div>`;
+            });
+            container.innerHTML = html;
+        }
+        document.getElementById('egeActions').style.display = 'flex';
+    }
+
+    async function submitEge() {
+        // Collect all answers
+        const allAnswers = [];
+        for (let i = 0; i < totalQ; i++) {
+            const inputs = document.querySelectorAll(`.eige-input[data-idx="${i}"]`);
+            const radios = document.querySelectorAll(`input[name="tf_${i}"]:checked, input[name="mc_${i}"]:checked`);
+            if (inputs.length) {
+                allAnswers.push(parseInt(inputs[0].value) || 0);
+            } else if (radios.length) {
+                allAnswers.push(parseInt(radios[0].value));
+            } else {
+                allAnswers.push(0);
+            }
+        }
+
+        const resp = await fetch('/api/ege_check', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({task_id: task.id, answers: allAnswers})
+        });
+        const data = await resp.json();
+        
+        document.getElementById('egeContent').style.display = 'none';
+        document.getElementById('egeActions').style.display = 'none';
+        const resultDiv = document.getElementById('egeResult');
+        resultDiv.style.display = 'block';
+        
+        let html = `<h3>✅ Результат: ${data.correct}/${data.total}</h3>`;
+        data.results.forEach((r, i) => {
+            const icon = r ? '✅' : '❌';
+            const correctAns = task.format === 'matching' ? task.correct[i] : 
+                              task.format === 'true_false' ? task.correct[i] :
+                              task.questions[i]?.correct !== undefined ? task.questions[i].correct + 1 : '?';
+            html += `<p style="font-size:9px;">${icon} Вопрос ${i+1}: ${r ? 'Верно' : 'Ошибка (правильно: ' + correctAns + ')'}</p>`;
+        });
+        html += `<button onclick="location.href='/ege'" style="margin-top:15px;">← К заданиям</button>`;
+        resultDiv.innerHTML = html;
+    }
+
+    render();
+</script>
+{% endblock %}

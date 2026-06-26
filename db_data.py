@@ -91,6 +91,11 @@ def populate_if_empty():
     conn.commit()
     conn.close()
 
+    # EGE tables
+    from ege import init_ege_table, populate_ege
+    init_ege_table()
+    populate_ege()
+
 def get_word(day_index):
     conn = get_conn()
     c = conn.cursor()

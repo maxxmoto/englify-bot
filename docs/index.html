@@ -206,6 +206,7 @@ canvas {
             <a href="#" onclick="showPage('tasks')">📝 Задания</a>
             <a href="#" onclick="showPage('verbs')">🐾 Глаголы</a>
             <a href="#" onclick="showPage('grammar')">📘 Грамматика</a>
+            <a href="#" onclick="showPage('ege')">🎯 ЕГЭ</a>
             <a href="#" onclick="showPage('words')">📚 Словарь</a>
             <a href="#" onclick="showPage('pro')">⭐ Pro</a>
             <a href="#" onclick="showPage('game')">🎮 Mikki runner</a>
@@ -281,6 +282,7 @@ canvas {
                 case 'grammar': renderGrammarLevels(main); break;
                 case 'words': renderWordsPage(main); break;
                 case 'pro': renderProPage(main); break;
+                case 'ege': renderEgePage(main); break;
 	        case 'game': renderGamePage(main); break;
 	        case 'builder': renderWordBuilderPage(main); break;
                 default: renderWordPage(main);
@@ -569,6 +571,117 @@ canvas {
 
 
 
+
+// ===== ЕГЭ =====
+const EGE_TASKS = [
+  {id:1,type:"1",theme:"New Year",format:"matching",instruction:"Установите соответствие между текстами и заголовками.",headings:["Celebrating New Year has a long history.","There are extravagant ways to celebrate New Year.","Good food is the most important thing for New Year.","New Year is the best time for new beginnings.","Properly preparing before New Year is important.","New Year is a great time to be with your relatives.","You don't need a special time to start something."],correct:[4,7,1,6,2,5,3]},
+  {id:2,type:"2",theme:"Drawing school",format:"true_false",instruction:"True / False / Not stated.",statements:["The park is full of children playing.","Lily often reads books on psychology.","The book contains some facts from the past.","Miles finds the book useless.","Miles rarely trusts strangers.","Lily is going to finish reading the book soon.","Miles has invited Lily to the cinema at the weekend."],correct:[2,1,3,1,2,1,3]},
+  {id:3,type:"2",theme:"A book about living without money",format:"true_false",instruction:"True / False / Not stated.",statements:["Ben is surprised by the number of people who don't earn money.","Ben spent a huge amount of money on food before.","Ben doesn't have a mobile phone.","Ben's friends have a positive attitude to his lifestyle.","Ben spends his free time in libraries.","Ben's parents taught him to make things himself.","Ben's dream is to build his own house."],correct:[1,3,2,1,3,2,1]},
+  {id:4,type:"3-9",theme:"Psychologist Lisa",format:"multiple_choice",instruction:"Multiple choice.",questions:[{num:3,text:"What do we learn about Lisa Black at the beginning of the interview?",options:["All of her books are bestsellers.","She has an undergraduate degree in psychology.","She has two world-famous books."],correct:2},{num:4,text:"Lisa compares weightlifting and studying to show that...",options:["to develop, one needs to work hard.","sport is necessary for brain work.","these processes are not very hard."],correct:0},{num:5,text:"Lisa considers a stress-free life to be...",options:["the best choice.","impossible.","a must."],correct:1},{num:6,text:"Lisa thinks stress is good if it is...",options:["manageable.","chronic.","short-term."],correct:2},{num:7,text:"Lisa explains to her clients that anxiety in fact is...",options:["a way to make you work more.","a protective mechanism.","a thing one needs to get rid of."],correct:1},{num:8,text:"According to Lisa, while discussing worst-case scenarios with children, parents should concentrate on the...",options:["things they say.","way they sound.","solution to the problem."],correct:2},{num:9,text:"Lisa advises parents to... the fact that their children are sometimes stressed.",options:["accept","dread","reject"],correct:0}]}
+];
+
+function renderEgePage(main) {
+    let html = `<div class="card"><h2>🎯 ЕГЭ-тренажёр</h2><p>Тренируйся выполнять задания из ЕГЭ</p></div>`;
+    EGE_TASKS.forEach(t => {
+        html += `<div class="card" style="cursor:pointer;" onclick="startEgeTask(${t.id})">
+            <h3>Задание ${t.type}: ${t.theme}</h3>
+            <p style="font-size:8px;color:#888;">${t.format === 'matching' ? 'Соответствие' : t.format === 'true_false' ? 'True/False/Not stated' : 'Множественный выбор'}</p>
+            <button style="margin-top:10px;">Начать →</button>
+        </div>`;
+    });
+    main.innerHTML = html;
+}
+
+function startEgeTask(id) {
+    const task = EGE_TASKS.find(t => t.id === id);
+    if (!task) return;
+    window._egeTask = task;
+    window._egeAnswers = {};
+    renderEgeQuestion();
+}
+
+function renderEgeQuestion() {
+    const task = window._egeTask;
+    const main = document.getElementById('mainContent');
+    const fmt = task.format;
+    const total = fmt === 'matching' ? task.headings.length : fmt === 'true_false' ? task.statements.length : task.questions.length;
+    
+    if (fmt === 'matching') {
+        let html = `<div class="card"><h2>🎯 ${task.theme}</h2><p style="font-size:8px;">${task.instruction}</p>`;
+        task.headings.forEach((h, i) => {
+            const val = window._egeAnswers[i] || '';
+            html += `<div style="border:2px solid var(--border);padding:10px;margin:8px 0;background:var(--card-bg);">
+                <p style="font-size:9px;">${i+1}. ${h}</p>
+                <p style="font-size:8px;">Номер: <input type="number" min="1" max="7" id="ege_inp_${i}" style="width:60px;padding:5px;font-family:inherit;font-size:9px;" value="${val}"></p>
+            </div>`;
+        });
+        html += `<button onclick="checkEge()">✅ Проверить</button> <button onclick="renderEgePage(document.getElementById('mainContent'))">← Назад</button></div>`;
+        main.innerHTML = html;
+    } else if (fmt === 'true_false') {
+        let html = `<div class="card"><h2>🎯 ${task.theme}</h2><p style="font-size:8px;">${task.instruction}</p>`;
+        task.statements.forEach((s, i) => {
+            const val = window._egeAnswers[i] || '';
+            html += `<div style="border:2px solid var(--border);padding:10px;margin:8px 0;background:var(--card-bg);">
+                <p style="font-size:9px;">${i+1}. ${s}</p>
+                <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;font-size:9px;">
+                    <label><input type="radio" name="tf_${i}" value="1" ${val==1?'checked':''}> True</label>
+                    <label><input type="radio" name="tf_${i}" value="2" ${val==2?'checked':''}> False</label>
+                    <label><input type="radio" name="tf_${i}" value="3" ${val==3?'checked':''}> Not stated</label>
+                </div>
+            </div>`;
+        });
+        html += `<button onclick="checkEge()">✅ Проверить</button> <button onclick="renderEgePage(document.getElementById('mainContent'))">← Назад</button></div>`;
+        main.innerHTML = html;
+    } else if (fmt === 'multiple_choice') {
+        let html = `<div class="card"><h2>🎯 ${task.theme}</h2><p style="font-size:8px;">${task.instruction}</p>`;
+        task.questions.forEach((q, i) => {
+            const val = window._egeAnswers[i];
+            html += `<div style="border:2px solid var(--border);padding:10px;margin:8px 0;background:var(--card-bg);">
+                <p style="font-size:9px;"><strong>${q.num}.</strong> ${q.text}</p>`;
+            q.options.forEach((opt, oi) => {
+                const checked = val === oi ? 'checked' : '';
+                html += `<label style="display:block;font-size:9px;padding:3px 0;"><input type="radio" name="mc_${i}" value="${oi}" ${checked}> ${opt}</label>`;
+            });
+            html += `</div>`;
+        });
+        html += `<button onclick="checkEge()">✅ Проверить</button> <button onclick="renderEgePage(document.getElementById('mainContent'))">← Назад</button></div>`;
+        main.innerHTML = html;
+    }
+}
+
+function checkEge() {
+    const task = window._egeTask;
+    const main = document.getElementById('mainContent');
+    const fmt = task.format;
+    const total = fmt === 'matching' ? task.headings.length : fmt === 'true_false' ? task.statements.length : task.questions.length;
+    let correct = 0;
+    let results = [];
+    
+    for (let i = 0; i < total; i++) {
+        let ans = null;
+        if (fmt === 'matching') {
+            const el = document.getElementById(`ege_inp_${i}`);
+            ans = el ? parseInt(el.value) : null;
+        } else if (fmt === 'true_false') {
+            const el = document.querySelector(`input[name="tf_${i}"]:checked`);
+            ans = el ? parseInt(el.value) : null;
+        } else {
+            const el = document.querySelector(`input[name="mc_${i}"]:checked`);
+            ans = el !== null ? parseInt(el.value) : null;
+        }
+        
+        const isCorrect = ans === task.correct[i];
+        if (isCorrect) correct++;
+        results.push(isCorrect);
+    }
+    
+    let html = `<div class="card"><h2>✅ Результат: ${correct}/${total}</h2>`;
+    results.forEach((r, i) => {
+        html += `<p style="font-size:9px;">${r ? '✅' : '❌'} Вопрос ${i+1}: ${r ? 'Верно' : 'Ошибка (правильно: ' + task.correct[i] + ')'}</p>`;
+    });
+    html += `<button onclick="renderEgePage(document.getElementById('mainContent'))">← К заданиям</button></div>`;
+    main.innerHTML = html;
+}
 
 // ===== ИГРА "МИККИ-РАННЕР" =====
 let gameRunning = false;
