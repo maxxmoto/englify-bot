@@ -2,3 +2,6 @@
 *.db
 __pycache__/
 *.pyc
+*.pdf
+ege_tasks_raw.json
+ege_tasks_clean.json
