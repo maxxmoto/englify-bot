@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+    <h2>📖 Чтение на английском</h2>
+    <p>Выбери статью. Нажми на любое слово — увидишь перевод.</p>
+</div>
+{% for article in articles %}
+<div class="card" style="cursor:pointer;" onclick="location.href='/reading/{{ article.id }}'">
+    <h3>{{ article.title }}</h3>
+    <p style="font-size:8px;color:#888;">
+        <span class="level-badge" style="background:{% if article.level == 'A2' %}#4caf50{% else %}#ff9800{% endif %};color:#fff;padding:3px 8px;">{{ article.level }}</span>
+        {{ article.text[:100] }}...</p>
+    <button style="margin-top:10px;">📖 Читать →</button>
+</div>
+{% endfor %}
+{% endblock %}

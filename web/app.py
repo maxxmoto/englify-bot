@@ -3,6 +3,7 @@ import os
 from flask import Flask, render_template, jsonify, request, redirect, url_for
 from db_data import get_word, get_verbs, get_test_questions, get_grammar_levels, init_tables, populate_if_empty
 from ege import get_all_ege_tasks, get_ege_task, check_ege_answer
+from reading import get_all_articles, get_article
 
 # Подтягиваем модули из папки бота
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
@@ -68,6 +69,17 @@ def voice(word):
 @app.route('/test')
 def test_page():
     return render_template('test.html', questions=get_test_questions())
+
+@app.route('/reading')
+def reading_page():
+    return render_template('reading.html', articles=get_all_articles())
+
+@app.route('/reading/<int:article_id>')
+def reading_article(article_id):
+    article = get_article(article_id)
+    if not article:
+        return redirect(url_for('reading_page'))
+    return render_template('reading_article.html', article=article)
 
 @app.route('/pro')
 def pro_page():

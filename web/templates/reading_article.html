@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+    <h2>📖 {{ article.title }}</h2>
+    <p style="font-size:8px;color:#888;">
+        <span class="level-badge" style="background:{% if article.level == 'A2' %}#4caf50{% else %}#ff9800{% endif %};color:#fff;padding:3px 8px;">{{ article.level }}</span>
+    </p>
+    <hr style="border:1px solid var(--border);margin:15px 0;">
+
+    <div id="articleText" style="text-align:left; font-size:11px; line-height:2; font-family:'Courier New',monospace;">
+        {% for word in article.text.split(' ') %}
+            {% set clean = word.lower().strip('.,!?;:()[]\'\"') %}
+            <span class="clickable-word" onclick="showTranslation('{{ clean|e }}', this)" style="cursor:pointer;border-bottom:1px dashed var(--border);">{{ word }}</span>
+        {% endfor %}
+    </div>
+
+    <hr style="border:1px solid var(--border);margin:15px 0;">
+    <p style="font-size:9px;color:#888;">👆 Нажми на любое слово, чтобы увидеть перевод</p>
+
+    <div id="translationBox" style="display:none;background:var(--accent);border:2px solid var(--border);padding:10px;margin-top:10px;font-size:9px;"></div>
+
+    <div style="margin-top:15px;">
+        <h3 style="font-size:10px;">📚 Слова из статьи</h3>
+        <table style="width:100%;font-size:9px;">
+            {% for w in article.words %}
+            <tr>
+                <td style="padding:5px;border-bottom:1px solid var(--border);"><strong>{{ w.word }}</strong></td>
+                <td style="padding:5px;border-bottom:1px solid var(--border);">{{ w.translation }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <div class="actions" style="margin-top:15px;">
+        <button onclick="speakArticle()">🔊 Озвучить</button>
+        <button onclick="location.href='/reading'">← К статьям</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const articleWords = {{ article.words | tojson }};
+    const wordMap = {};
+    articleWords.forEach(w => { wordMap[w.word.toLowerCase()] = w.translation; });
+
+    function showTranslation(word, el) {
+        const box = document.getElementById('translationBox');
+        const trans = wordMap[word];
+        if (trans) {
+            box.innerHTML = '<strong>' + word + '</strong> — ' + trans;
+            box.style.display = 'block';
+            el.style.background = 'var(--hover)';
+            setTimeout(() => { el.style.background = ''; }, 1000);
+        } else {
+            box.innerHTML = 'Перевод не найден для: <strong>' + word + '</strong>';
+            box.style.display = 'block';
+        }
+    }
+
+    function speakArticle() {
+        const text = `{{ article.text | e }}`;
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'en-US';
+        u.rate = 0.8;
+        speechSynthesis.speak(u);
+    }
+</script>
+{% endblock %}

@@ -138,15 +138,16 @@ def back_button(lang):
 def main_menu_keyboard(lang):
     labels = {
         'ru': {"tasks": "📝 Задания", "verbs": "🐾 Глаголы", "words": "📚 Мои слова",
-               "level": "🎚 Уровень", "mode": "🌐 Режим", "pro": "⭐ Pro", "ege": "🎯 ЕГЭ"},
+               "level": "🎚 Уровень", "mode": "🌐 Режим", "pro": "⭐ Pro", "ege": "🎯 ЕГЭ", "reading": "📖 Чтение"},
         'en': {"tasks": "📝 Tasks", "verbs": "🐾 Verbs", "words": "📚 My words",
-               "level": "🎚 Level", "mode": "🌐 Mode", "pro": "⭐ Pro", "ege": "🎯 USE"}
+               "level": "🎚 Level", "mode": "🌐 Mode", "pro": "⭐ Pro", "ege": "🎯 USE", "reading": "📖 Reading"}
     }
     l = labels[lang]
     keyboard = [
         [InlineKeyboardButton(l["tasks"], callback_data="menu_tasks")],
         [InlineKeyboardButton(l["verbs"], callback_data="menu_verbs")],
-        [InlineKeyboardButton(l["ege"], callback_data="menu_ege")],
+        [InlineKeyboardButton(l["ege"], callback_data="menu_ege"),
+         InlineKeyboardButton(l["reading"], callback_data="menu_reading")],
         [InlineKeyboardButton(l["words"], callback_data="menu_words")],
         [InlineKeyboardButton(l["level"], callback_data="menu_level"),
          InlineKeyboardButton(l["mode"], callback_data="menu_mode")],
@@ -377,6 +378,31 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             hint = "Нет задания"
         await query.answer(hint, show_alert=True)
+
+    # ---------- ЧТЕНИЕ ----------
+    elif data == "menu_reading":
+        from reading import get_all_articles
+        articles = get_all_articles()
+        text = _("📖 **Чтение на английском**\nВыбери статью:", "📖 **English Reading**\nChoose an article:", lang)
+        buttons = []
+        for a in articles:
+            label = f"[{a['level']}] {a['title']}"
+            buttons.append([InlineKeyboardButton(label, callback_data=f"read_{a['id']}")])
+        buttons.append([InlineKeyboardButton(_("⬅ Назад", "⬅ Back", lang), callback_data="back_main")])
+        await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(buttons))
+    elif data.startswith("read_"):
+        from reading import get_article
+        article_id = int(data.split("_")[1])
+        article = get_article(article_id)
+        if not article:
+            return
+        text = _(
+            f"📖 **{article['title']}** ({article['level']})\n\n{article['text']}",
+            f"📖 **{article['title']}** ({article['level']})\n\n{article['text']}", lang
+        )
+        word_list = "\n".join([f"• {w['word']} — {w['translation']}" for w in article['words']])
+        text += _("\n\n**Слова:**\n", "\n\n**Words:**\n", lang) + word_list
+        await query.edit_message_text(text, reply_markup=back_button(lang))
 
     # ---------- ЕГЭ ----------
     elif data == "menu_ege":

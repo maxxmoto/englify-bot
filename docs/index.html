@@ -206,6 +206,7 @@ canvas {
             <a href="#" onclick="showPage('tasks')">📝 Задания</a>
             <a href="#" onclick="showPage('verbs')">🐾 Глаголы</a>
             <a href="#" onclick="showPage('grammar')">📘 Грамматика</a>
+            <a href="#" onclick="showPage('reading')">📖 Чтение</a>
             <a href="#" onclick="showPage('ege')">🎯 ЕГЭ</a>
             <a href="#" onclick="showPage('words')">📚 Словарь</a>
             <a href="#" onclick="showPage('pro')">⭐ Pro</a>
@@ -282,6 +283,7 @@ canvas {
                 case 'grammar': renderGrammarLevels(main); break;
                 case 'words': renderWordsPage(main); break;
                 case 'pro': renderProPage(main); break;
+                case 'reading': renderReadingPage(main); break;
                 case 'ege': renderEgePage(main); break;
 	        case 'game': renderGamePage(main); break;
 	        case 'builder': renderWordBuilderPage(main); break;
@@ -572,7 +574,82 @@ canvas {
 
 
 
+// ===== ЧТЕНИЕ =====
+const READING_ARTICLES = [
+  {id:1,title:"My Morning Routine",level:"A2",text:"Every morning I wake up at seven o'clock. First, I brush my teeth and wash my face. Then I have breakfast. I usually eat cereal with milk and drink a glass of orange juice. After breakfast, I get dressed and go to school. I live near my school, so I walk there. It takes me fifteen minutes. I like to listen to music on the way. When I arrive at school, I meet my friends and we go to class together.",words:[{word:"routine",translation:"режим"},{word:"wake up",translation:"просыпаться"},{word:"brush",translation:"чистить"},{word:"breakfast",translation:"завтрак"},{word:"cereal",translation:"хлопья"},{word:"glass",translation:"стакан"},{word:"arrive",translation:"прибывать"},{word:"meet",translation:"встречать"}]},
+  {id:2,title:"A Day at the Park",level:"A2",text:"Last Sunday, my family and I went to the park. The weather was beautiful and sunny. My mother packed a picnic basket with sandwiches, fruit, and lemonade. My father played football with my brother. I read a book under a big tree. My little sister fed the ducks in the pond. We stayed at the park for four hours. In the evening, we went home tired but happy.",words:[{word:"weather",translation:"погода"},{word:"sunny",translation:"солнечный"},{word:"pack",translation:"собирать"},{word:"picnic",translation:"пикник"},{word:"basket",translation:"корзина"},{word:"pond",translation:"пруд"},{word:"feed",translation:"кормить"},{word:"tired",translation:"уставший"}]},
+  {id:3,title:"My Favourite Hobby",level:"A2",text:"My favourite hobby is photography. I started taking pictures two years ago when my grandfather gave me his old camera. At first, I only took photos of my cat and my garden. Then I joined a photography club at school. Now I take photos of everything: interesting buildings, beautiful sunsets, and people in the street. I learned how to use light and shadows. Last month, I won a prize in a school photography competition.",words:[{word:"photography",translation:"фотография"},{word:"camera",translation:"камера"},{word:"join",translation:"присоединяться"},{word:"club",translation:"клуб"},{word:"sunset",translation:"закат"},{word:"shadow",translation:"тень"},{word:"prize",translation:"приз"},{word:"competition",translation:"конкурс"}]},
+  {id:4,title:"How Pizza Became Popular",level:"B1",text:"Pizza is one of the most popular foods in the world today, but it originally came from Italy. In the 18th century, people in Naples began adding tomatoes to flat bread. This was the beginning of modern pizza. In 1889, a chef named Raffaele Esposito created a special pizza for the Italian king. He used tomatoes, mozzarella cheese, and basil to represent the colours of the Italian flag. Italian immigrants brought pizza to America in the early 20th century.",words:[{word:"popular",translation:"популярный"},{word:"originally",translation:"изначально"},{word:"century",translation:"век"},{word:"chef",translation:"шеф-повар"},{word:"create",translation:"создавать"},{word:"represent",translation:"представлять"},{word:"flag",translation:"флаг"},{word:"immigrant",translation:"иммигрант"}]},
+  {id:5,title:"The Story of the Internet",level:"B1",text:"The Internet changed our lives completely, but it started as a small project. In the 1960s, scientists in the United States created a network called ARPANET. It connected four computers at different universities. The goal was to share information quickly. In 1991, a British scientist named Tim Berners-Lee invented the World Wide Web. Today, more than five billion people use the Internet for work, study, entertainment, and talking with friends.",words:[{word:"network",translation:"сеть"},{word:"connect",translation:"соединять"},{word:"goal",translation:"цель"},{word:"invent",translation:"изобретать"},{word:"billion",translation:"миллиард"},{word:"entertainment",translation:"развлечение"},{word:"scientist",translation:"учёный"},{word:"information",translation:"информация"}]}
+];
+
+function renderReadingPage(main) {
+    let html = '<div class="card"><h2>\uD83D\uDCD6 Чтение на английском</h2><p>Нажми на слово — увидишь перевод.</p></div>';
+    READING_ARTICLES.forEach(function(a) {
+        var levelColor = a.level === 'A2' ? '#4caf50' : '#ff9800';
+        html += '<div class="card" style="cursor:pointer;" onclick="showArticle(' + a.id + ')">' +
+            '<h3>' + a.title + '</h3>' +
+            '<p style="font-size:8px;color:#888;"><span style="background:' + levelColor + ';color:#fff;padding:2px 6px;">' + a.level + '</span> ' + a.text.substring(0, 100) + '...</p>' +
+            '<button style="margin-top:10px;">\uD83D\uDCD6 Читать \u2192</button></div>';
+    });
+    main.innerHTML = html;
+}
+
+function showArticle(id) {
+    var article = READING_ARTICLES.find(function(a) { return a.id === id; });
+    if (!article) return;
+    var main = document.getElementById('mainContent');
+    var wordMap = {};
+    article.words.forEach(function(w) { wordMap[w.word.toLowerCase()] = w.translation; });
+
+    var words = article.text.split(' ');
+    var textHtml = '';
+    words.forEach(function(w) {
+        var clean = w.replace(/[.,!?;:()'"\[\]]/g, '').toLowerCase();
+        textHtml += '<span class="clickable-word" onclick="showWordTrans(\'' + clean.replace(/'/g, "\\'") + '\', this, ' + JSON.stringify(wordMap).replace(/'/g, "\\'") + ')" style="cursor:pointer;border-bottom:1px dashed var(--border);">' + w + '</span> ';
+    });
+
+    var wordTable = '<table style="width:100%;font-size:9px;">';
+    article.words.forEach(function(w) {
+        wordTable += '<tr><td style="padding:5px;border-bottom:1px solid var(--border);"><strong>' + w.word + '</strong></td><td style="padding:5px;border-bottom:1px solid var(--border);">' + w.translation + '</td></tr>';
+    });
+    wordTable += '</table>';
+
+    main.innerHTML = '<div class="card" style="text-align:left;">' +
+        '<h2>\uD83D\uDCD6 ' + article.title + '</h2>' +
+        '<p style="font-size:8px;color:#888;"><span style="background:' + (article.level === 'A2' ? '#4caf50' : '#ff9800') + ';color:#fff;padding:2px 6px;">' + article.level + '</span></p>' +
+        '<hr style="border:1px solid var(--border);margin:15px 0;">' +
+        '<div id="articleText" style="font-size:11px;line-height:2;font-family:Courier New,monospace;">' + textHtml + '</div>' +
+        '<hr style="border:1px solid var(--border);margin:15px 0;">' +
+        '<div id="transBox" style="display:none;background:var(--accent);border:2px solid var(--border);padding:10px;font-size:9px;"></div>' +
+        '<div style="margin-top:15px;"><h3 style="font-size:10px;">\uD83D\uDCDA Слова из статьи</h3>' + wordTable + '</div>' +
+        '<div class="actions" style="margin-top:15px;"><button onclick="speakArticleText(\'' + article.text.replace(/'/g, "\\'") + '\')">\uD83D\uDD0A Озвучить</button>' +
+        '<button onclick="renderReadingPage(document.getElementById(\'mainContent\'))">\u2190 К статьям</button></div></div>';
+}
+
+function showWordTrans(word, el, wordMap) {
+    var box = document.getElementById('transBox');
+    var trans = wordMap[word];
+    if (trans) {
+        box.innerHTML = '<strong>' + word + '</strong> \u2014 ' + trans;
+        box.style.display = 'block';
+        el.style.background = 'var(--hover)';
+        setTimeout(function() { el.style.background = ''; }, 1000);
+    } else {
+        box.innerHTML = 'Перевод не найден: <strong>' + word + '</strong>';
+        box.style.display = 'block';
+    }
+}
+
+function speakArticleText(text) {
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = 'en-US';
+    u.rate = 0.8;
+    speechSynthesis.speak(u);
+}
+
 // ===== ЕГЭ =====
+
 const EGE_TASKS = [
   {id:1,type:"1",theme:"New Year",format:"matching",instruction:"Установите соответствие между текстами A-F и заголовками 1-7.",headings:["Celebrating New Year has a long history.","There are extravagant ways to celebrate New Year.","Good food is the most important thing for New Year.","New Year is the best time for new beginnings.","Properly preparing before New Year is important.","New Year is a great time to be with your relatives.","You don't need a special time to start something."],texts:["A. People have been celebrating the start of a new year for thousands of years. The first celebrations of New Year were in ancient Babylon about 4000 years ago.","B. In many countries, people make special preparations for the New Year. They clean their houses, pay off debts, and buy new clothes to bring good luck.","C. Some people celebrate New Year by going to extravagant parties, watching fireworks displays, or travelling to exotic destinations.","D. Too much food is an essential part of New Year celebrations. In Spain, people eat 12 grapes at midnight. In Japan, they eat soba noodles.","E. Many people see the New Year as a perfect opportunity to make positive changes. They set resolutions such as exercising more or learning a new skill.","F. The New Year period is associated with family reunions. People travel to be with loved ones, share meals, and exchange gifts."],correct:[2,5,4,3,1,6]},
   {id:2,type:"2",theme:"Drawing school",format:"true_false",instruction:"True / False / Not stated.",statements:["The park is full of children playing.","Lily often reads books on psychology.","The book contains some facts from the past.","Miles finds the book useless.","Miles rarely trusts strangers.","Lily is going to finish reading the book soon.","Miles has invited Lily to the cinema at the weekend."],correct:[2,1,3,1,2,1,3]},
