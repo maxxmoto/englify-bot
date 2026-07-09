@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card" style="max-width:650px;">
+    <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;justify-content:center;">
+        <img src="{{ url_for('static', filename='hi.webp') }}" alt="Mickey" style="width:120px;image-rendering:pixelated;">
+        <div style="text-align:left;flex:1;min-width:200px;">
+            <h2 style="font-size:14px;">Привет! Я Микки 🐱</h2>
+            <p style="font-size:8px;line-height:1.6;">Я твой личный помощник в изучении английского. Давай расскажу, как у нас всё устроено!</p>
+        </div>
+    </div>
+</div>
+
+<div class="card" style="max-width:650px;text-align:left;">
+    <h3 style="font-size:11px;">📅 Слово дня</h3>
+    <p style="font-size:8px;line-height:1.8;">Каждый день — новое слово с переводом и примером. Нажми <strong>✅ Выучил</strong>, чтобы сохранить его в свой словарь. Всего их 365 — хватит на целый год!</p>
+</div>
+
+<div class="card" style="max-width:650px;text-align:left;">
+    <h3 style="font-size:11px;">📝 Ежедневные задания</h3>
+    <p style="font-size:8px;line-height:1.8;">3 задания каждый день. У тебя есть <strong>3 жизни ❤️</strong> и <strong>серия 🔥</strong>. Ошибайся, пробуй снова и набирай streak. Безлимитные задания — в Pro.</p>
+</div>
+
+<div class="card" style="max-width:650px;text-align:left;">
+    <h3 style="font-size:11px;">📖 Чтение</h3>
+    <p style="font-size:8px;line-height:1.8;">Статьи на английском для начинающих. Нажми на любое слово — я покажу перевод. Можно озвучить всю статью целиком.</p>
+</div>
+
+<div class="card" style="max-width:650px;text-align:left;">
+    <h3 style="font-size:11px;">🐾 Неправильные глаголы</h3>
+    <p style="font-size:8px;line-height:1.8;">Тренируй третью форму неправильных глаголов. 87 глаголов, случайные 10 за тренировку. Идеально для подготовки к ЕГЭ.</p>
+</div>
+
+<div class="card" style="max-width:650px;text-align:left;">
+    <h3 style="font-size:11px;">📘 Грамматика</h3>
+    <p style="font-size:8px;line-height:1.8;">24 темы: от <strong>am/is/are</strong> до <strong>инверсии и идиом</strong>. Теория + практика с проверкой ответов. Три уровня сложности.</p>
+</div>
+
+<div class="card" style="max-width:650px;text-align:left;">
+    <h3 style="font-size:11px;">🎯 ЕГЭ-тренажёр</h3>
+    <p style="font-size:8px;line-height:1.8;">Реальные задания из ЕГЭ: соответствие заголовков, True/False/Not stated, множественный выбор. Проверка ответов и разбор ошибок.</p>
+</div>
+
+<div class="card" style="max-width:650px;text-align:left;">
+    <h3 style="font-size:11px;">⭐ Pro</h3>
+    <p style="font-size:8px;line-height:1.8;">Всего <strong>1 звезда Telegram</strong> навсегда! Снимает лимит заданий, включает перевод в English Mode и открывает эксклюзивные фичи.</p>
+</div>
+
+<div class="card" style="max-width:650px;text-align:left;">
+    <h3 style="font-size:11px;">📚 Словарь</h3>
+    <p style="font-size:8px;line-height:1.8;">Все слова, которые ты отметил как выученные, собираются здесь. Можно отследить прогресс: <strong>X / 365 слов</strong>.</p>
+</div>
+
+<div class="card" style="max-width:650px;text-align:center;">
+    <img src="{{ url_for('static', filename='hi.webp') }}" alt="Mickey" style="width:80px;image-rendering:pixelated;">
+    <p style="font-size:9px;line-height:1.6;">Микки всегда рядом 🐱<br>Учи английский каждый день — и всё получится!</p>
+    <div class="actions" style="justify-content:center;">
+        <button onclick="location.href='/'">🏠 На главную</button>
+        <button onclick="location.href='https://t.me/engliFLY_bot'">🤖 Открыть бота</button>
+    </div>
+</div>
+{% endblock %}

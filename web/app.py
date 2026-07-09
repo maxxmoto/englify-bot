@@ -19,6 +19,10 @@ def add_headers(response):
         response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
     return response
 
+@app.route('/about')
+def about_page():
+    return render_template('about.html')
+
 @app.route('/')
 def index():
     today = 0

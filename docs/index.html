@@ -209,6 +209,7 @@ canvas {
             <a href="#" onclick="showPage('reading')">📖 Чтение</a>
             <a href="#" onclick="showPage('ege')">🎯 ЕГЭ</a>
             <a href="#" onclick="showPage('words')">📚 Словарь</a>
+            <a href="#" onclick="showPage('about')">ℹ️ О сайте</a>
             <a href="#" onclick="showPage('pro')">⭐ Pro</a>
             <a href="#" onclick="showPage('game')">🎮 Mikki runner</a>
 	    <a href="#" onclick="showPage('builder')">🧩 Word Builder</a>
@@ -283,6 +284,7 @@ canvas {
                 case 'grammar': renderGrammarLevels(main); break;
                 case 'words': renderWordsPage(main); break;
                 case 'pro': renderProPage(main); break;
+                case 'about': renderAboutPage(main); break;
                 case 'reading': renderReadingPage(main); break;
                 case 'ege': renderEgePage(main); break;
 	        case 'game': renderGamePage(main); break;
@@ -573,6 +575,50 @@ canvas {
 
 
 
+
+// ===== О САЙТЕ =====
+function renderAboutPage(main) {
+    main.innerHTML = `
+        <div class="card" style="max-width:650px;">
+            <div style="display:flex;align-items:center;gap:15px;flex-wrap:wrap;justify-content:center;">
+                <img src="hi.webp" alt="Mickey" style="width:100px;image-rendering:pixelated;">
+                <div style="text-align:left;flex:1;">
+                    <h2>Привет! Я Микки \uD83D\uDC31</h2>
+                    <p style="font-size:8px;line-height:1.6;">Я твой помощник в изучении английского. Вот что мы умеем:</p>
+                </div>
+            </div>
+        </div>
+        <div class="card" style="max-width:650px;text-align:left;">
+            <h3>\uD83D\uDCC5 Слово дня</h3>
+            <p style="font-size:8px;">Каждый день — новое слово с переводом. 365 слов на весь год. Отмечай выученные — следи за прогрессом.</p>
+        </div>
+        <div class="card" style="max-width:650px;text-align:left;">
+            <h3>\uD83D\uDCDD Ежедневные задания</h3>
+            <p style="font-size:8px;">3 задания с 3 жизнями и серией. Pro-версия снимает лимит.</p>
+        </div>
+        <div class="card" style="max-width:650px;text-align:left;">
+            <h3>\uD83D\uDCD6 Чтение</h3>
+            <p style="font-size:8px;">Статьи на английском. Нажми на слово — увидишь перевод. Озвучка всей статьи.</p>
+        </div>
+        <div class="card" style="max-width:650px;text-align:left;">
+            <h3>\uD83D\uDC3E Неправильные глаголы</h3>
+            <p style="font-size:8px;">87 глаголов, V3 тренировка, 10 за раунд. Для ЕГЭ и не только.</p>
+        </div>
+        <div class="card" style="max-width:650px;text-align:left;">
+            <h3>\uD83D\uDCD8 Грамматика</h3>
+            <p style="font-size:8px;">24 темы от начального до продвинутого. Теория + упражнения с проверкой.</p>
+        </div>
+        <div class="card" style="max-width:650px;text-align:left;">
+            <h3>\uD83C\uDFAF ЕГЭ-тренажёр</h3>
+            <p style="font-size:8px;">Реальные задания: matching, true/false, multiple choice. С проверкой и разбором.</p>
+        </div>
+        <div class="card" style="max-width:650px;text-align:center;">
+            <img src="hi.webp" alt="Mickey" style="width:70px;image-rendering:pixelated;">
+            <p style="font-size:9px;">Микки всегда рядом \uD83D\uDC31<br>Учи английский каждый день!</p>
+            <div class="actions"><button onclick="showPage(\'word\')">\uD83C\uDFE0 На главную</button></div>
+        </div>
+    `;
+}
 
 // ===== ЧТЕНИЕ =====
 const READING_ARTICLES = [
