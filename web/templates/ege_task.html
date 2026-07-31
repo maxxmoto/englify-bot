@@ -1,4 +1,8 @@
 {% extends "base.html" %}
+{% block title %}Englify — ЕГЭ задание {{ task.type }} | {{ task.theme }}{% endblock %}
+{% block meta_description %}ЕГЭ по английскому: задание {{ task.type }} — {{ task.theme }}. Тренируйся с проверкой ответов. Бесплатная подготовка к ЕГЭ.{% endblock %}
+{% block og_title %}Englify — ЕГЭ задание {{ task.type }}: {{ task.theme }}{% endblock %}
+{% block og_description %}Задание {{ task.type }} из ЕГЭ по английскому языку. {{ task.instruction }} Проверка ответов и разбор.{% endblock %}
 {% block content %}
 <div class="card" id="egeCard">
     <h2>🎯 Задание {{ task.type }}: {{ task.theme }}</h2>

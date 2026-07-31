@@ -3,25 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Englify – учи английский с Микки каждый день</title>
-    <meta name="description" content="Englify — учи английский язык бесплатно с Микки. Слово дня, ежедневные задания, грамматика, тренажёр глаголов и словарь.">
-    <meta name="keywords" content="английский язык, учить английский онлайн, englify, слово дня, грамматика английского, irregular verbs, изучение английского">
-    <meta name="robots" content="index, follow">
-    <meta name="language" content="Russian">
-    <meta property="og:title" content="Englify – учи английский с Микки">
-    <meta property="og:description" content="Ежедневные слова, задания, грамматика и тренажёры для изучения английского языка бесплатно.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://englify.ru">
-    <meta property="og:image" content="{{ url_for('static', filename='logo.png', _external=True) }}">
-    <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="Englify – учи английский с Микки">
-    <meta name="twitter:description" content="Изучай английский каждый день с Микки! Слово дня, задания, грамматика.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Englify — учи английский с Микки{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}Englify — учи английский язык бесплатно: слово дня, 365 слов, ежедневные задания, грамматика, тренажёр глаголов, ЕГЭ, статьи для чтения. Удобный сайт и Telegram-бот.{% endblock %}">
+    <meta name="keywords" content="английский язык, учить английский онлайн бесплатно, слово дня английский, грамматика английского языка, irregular verbs, ЕГЭ английский, подготовка к ЕГЭ, изучение английского, englify">
+    <meta name="robots" content="{% block meta_robots %}index, follow{% endblock %}">
+    <meta name="author" content="Englify">
+    <meta name="theme-color" content="#ffd9b0">
+    <link rel="canonical" href="{{ request.url_root }}{{ request.path }}">
+    <link rel="alternate" hreflang="ru" href="{{ request.url_root }}{{ request.path }}">
+    <meta property="og:locale" content="ru_RU">
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+    <meta property="og:site_name" content="Englify">
+    <meta property="og:title" content="{% block og_title %}Englify — учи английский с Микки — бесплатный тренажёр{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Englify — бесплатный сервис для изучения английского языка. Слово дня, ежедневные задания, грамматика от beginner до advanced, тренажёр неправильных глаголов, подготовка к ЕГЭ, статьи с переводом.{% endblock %}">
+    <meta property="og:url" content="{{ request.url }}">
+    <meta property="og:image" content="{{ url_for('static', filename='smart.png', _external=True) }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Englify — учи английский с Микки">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@englify_bot">
+    <meta name="twitter:title" content="{% block twitter_title %}Englify — учи английский с Микки{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}Изучай английский каждый день бесплатно! Слово дня, задания, грамматика, ЕГЭ, статьи.{% endblock %}">
+    <meta name="twitter:image" content="{{ url_for('static', filename='smart.png', _external=True) }}">
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.webp') }}">
-    <link rel="apple-touch-icon" href="{{ url_for('static', filename='logo.webp') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='logo.webp') }}">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='logo.webp') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='logo.webp') }}">
+    <link rel="mask-icon" href="{{ url_for('static', filename='favicon.svg') }}" color="#ffd9b0">
+    <meta name="apple-mobile-web-app-title" content="Englify">
+    <meta name="application-name" content="Englify">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"></noscript>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
@@ -30,11 +45,31 @@
         "@context": "https://schema.org",
         "@type": "WebSite",
         "name": "Englify",
-        "description": "Изучение английского языка с Микки",
+        "alternateName": "Englify с Микки",
         "url": "https://englify.ru",
-        "inLanguage": "ru"
+        "description": "Бесплатный сервис для изучения английского языка с Микки — слово дня, задания, грамматика, ЕГЭ",
+        "inLanguage": "ru",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://englify.ru/search?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+        }
     }
     </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Englify",
+        "url": "https://englify.ru",
+        "logo": "{{ url_for('static', filename='logo.webp', _external=True) }}",
+        "description": "Бесплатное изучение английского языка",
+        "sameAs": [
+            "https://t.me/engliFLY_bot"
+        ]
+    }
+    </script>
+    {% block head_extra %}{% endblock %}
 </head>
 <body class="theme-day">
     <!-- Облака (двигаются на фоне) -->

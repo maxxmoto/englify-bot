@@ -11,6 +11,31 @@ from content import generate_tasks
 
 app = Flask(__name__)
 
+@app.route('/robots.txt')
+def robots():
+    return '''User-agent: *
+Allow: /
+Disallow: /api/*
+Sitemap: https://englify.ru/sitemap.xml''', 200, {'Content-Type': 'text/plain'}
+
+@app.route('/sitemap.xml')
+def sitemap():
+    from grammar import GRAMMAR_LEVELS
+    urls = []
+    base = 'https://englify.ru'
+    static = ['', '/tasks', '/verbs', '/grammar', '/words', '/pro', '/ege', '/reading', '/about']
+    for s in static:
+        prio = '1.0' if s == '' else '0.8'
+        freq = 'daily' if s in ('', '/tasks') else 'weekly'
+        urls.append(f'  <url><loc>{base}{s}</loc><changefreq>{freq}</changefreq><priority>{prio}</priority></url>')
+    for a in get_all_ege_tasks():
+        urls.append(f'  <url><loc>{base}/ege/{a["id"]}</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>')
+    for a in get_all_articles():
+        urls.append(f'  <url><loc>{base}/reading/{a["id"]}</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>')
+    for lvl in GRAMMAR_LEVELS:
+        urls.append(f'  <url><loc>{base}/grammar/{lvl}</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>')
+    return f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + '\n'.join(urls) + '\n</urlset>', 200, {'Content-Type': 'application/xml'}
+
 @app.after_request
 def add_headers(response):
     response.headers['X-Content-Type-Options'] = 'nosniff'

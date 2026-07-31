@@ -1,4 +1,23 @@
 {% extends "base.html" %}
+{% block title %}Englify — {{ article.title }} | Чтение на английском{% endblock %}
+{% block meta_description %}Читай статью «{{ article.title }}» на английском: нажимай на слова для перевода. Уровень {{ article.level }}. Озвучка. Бесплатно.{% endblock %}
+{% block og_title %}Englify — {{ article.title }} ({{ article.level }}){% endblock %}
+{% block og_description %}Статья на английском: {{ article.text[:120] }}... Нажимай на слова — перевод.{% endblock %}
+{% block og_type %}article{% endblock %}
+{% block head_extra %}
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "{{ article.title }}",
+    "description": "{{ article.text[:150] }}...",
+    "inLanguage": "en",
+    "author": {"@type": "Organization", "name": "Englify"},
+    "publisher": {"@type": "Organization", "name": "Englify", "logo": {"@type": "ImageObject", "url": "{{ url_for('static', filename='logo.webp', _external=True) }}"}}}
+}
+}
+</script>
+{% endblock %}
 {% block content %}
 <div class="card">
     <h2>📖 {{ article.title }}</h2>
